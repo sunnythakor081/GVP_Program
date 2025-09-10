@@ -1,0 +1,166 @@
+pro-3
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SimpleStorage {
+   // uint256 public myUint;       
+   // int256 public myInt;         
+   // bool public myBool;           
+    //string public myString;      
+   // address public myAddress;     
+   // bytes32 public myBytes;       
+    uint256 favoriteNumber;
+
+    // Struct for people
+    struct People {
+        uint256 favoriteNumber;
+        string name;
+    }
+
+      //  Arrays 
+   // uint256[] public dynamicArray;     
+   // uint256[3] public fixedArray;         
+
+    // Array to store multiple people
+    People[] public people;
+
+    // Mapping name
+    mapping(string => uint256) public nameToFavoriteNumber;
+
+    // Store a single favorite number
+    function store(uint256 _favoriteNumber) public {
+        favoriteNumber = _favoriteNumber;
+    }
+
+    // Retrieve the stored number
+    function retrieve() public view returns (uint256) {
+        return favoriteNumber;
+    }
+
+    // Add person to array and mapping
+    function addPerson(string memory _name, uint256 _favoriteNumber) public {
+        people.push(People(_favoriteNumber, _name));
+        nameToFavoriteNumber[_name] = _favoriteNumber;
+    }
+
+      // Example of Scope & Visibility
+    // uint256 private secretNumber = 123;  // private → cannot be accessed outside contract
+    
+    // function getSecret() internal view returns (uint256) {
+    //     return secretNumber;              // internal → can be used inside contract
+    // }
+
+    // function revealSecret() public view returns (uint256) {
+    //     return getSecret();               // public → accessible outside
+    // }
+
+
+       // Intro to Storage (permanent) vs Memory (temporary)
+    // string[] public storageArray;
+
+    // function addToStorageArray(string memory _value) public {
+    //     storageArray.push(_value);   // stored permanently
+    // }
+
+    // function readFromMemory() public pure returns (string memory) {
+    //     string memory temp = "Temporary in memory";  // not saved
+    //     return temp;
+    // }
+}
+
+pro-5
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/*
+   FUND ME CONTRACT
+   ----------------
+   Concepts:
+   • payable → allows function to receive ETH
+   • msg.sender → who is sending the transaction
+   • msg.value → how much ETH (in wei) was sent
+   • ETH units → wei, gwei, ether
+*/
+
+contract FundMe {
+    // Keep track of who funded and how much
+    mapping(address => uint256) public addressToAmountFunded;
+    address[] public funders;
+
+    // Minimum contribution (0.01 ETH)
+    uint256 public constant MINIMUM_USD = 0.01 ether;
+
+    // Fund the contract
+    function fund() public payable {
+        // msg.value is in wei → check minimum contribution
+        require(msg.value >= MINIMUM_USD, "Send at least 0.01 ETH!");
+
+        // msg.sender = address of the sender
+        addressToAmountFunded[msg.sender] += msg.value;
+
+        // Add new funder
+        funders.push(msg.sender);
+    }
+
+    // Show balance of contract
+    function getBalance() public view returns (uint256) {
+        return address(this).balance; // total ETH stored
+    }
+
+    // Withdraw funds (only owner in real use)
+    function withdraw() public {
+        // send all ETH to the caller (msg.sender)
+        payable(msg.sender).transfer(address(this).balance);
+    }
+}
+
+pro-4
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SimpleStorage {
+    uint256 private favoriteNumber;
+
+    function store(uint256 _favoriteNumber) external {
+        favoriteNumber = _favoriteNumber;
+    }
+
+    function retrieve() external view returns (uint256) {
+        return favoriteNumber;
+    }
+}
+
+add-code
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "./SimpleStorage.sol";  // Importing the other contract
+
+contract StorageFactory {
+    SimpleStorage[] public simpleStorageArray;
+
+    function createSimpleStorageContract() external {
+        SimpleStorage newStorage = new SimpleStorage();
+        simpleStorageArray.push(newStorage);
+    }
+
+    function storeInDeployed(uint256 _contractIndex, uint256 _favoriteNumber) external {
+        require(_contractIndex < simpleStorageArray.length, "Invalid contract index....");
+        SimpleStorage selectedStorage = simpleStorageArray[_contractIndex];
+        selectedStorage.store(_favoriteNumber);
+    }
+
+    function retrieveFromDeployed(uint256 _contractIndex) external view returns (uint256) {
+        require(_contractIndex < simpleStorageArray.length, "Invalid contract index");
+        SimpleStorage selectedStorage = simpleStorageArray[_contractIndex];
+        return selectedStorage.retrieve();
+    }
+
+    function getDeployedContractsCount() external view returns (uint256) {
+        return simpleStorageArray.length;
+    }
+}
+

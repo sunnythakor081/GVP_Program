@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "./SimpleStorage.sol";  // Importing the other contract
+
+contract StorageFactory {
+    SimpleStorage[] public simpleStorageArray;
+
+    function createSimpleStorageContract() external {
+        SimpleStorage newStorage = new SimpleStorage();
+        simpleStorageArray.push(newStorage);
+    }
+
+    function storeInDeployed(uint256 _contractIndex, uint256 _favoriteNumber) external {
+        require(_contractIndex < simpleStorageArray.length, "Invalid contract index....");
+        SimpleStorage selectedStorage = simpleStorageArray[_contractIndex];
+        selectedStorage.store(_favoriteNumber);
+    }
+
+    function retrieveFromDeployed(uint256 _contractIndex) external view returns (uint256) {
+        require(_contractIndex < simpleStorageArray.length, "Invalid contract index");
+        SimpleStorage selectedStorage = simpleStorageArray[_contractIndex];
+        return selectedStorage.retrieve();
+    }
+
+    function getDeployedContractsCount() external view returns (uint256) {
+        return simpleStorageArray.length;
+    }
+}

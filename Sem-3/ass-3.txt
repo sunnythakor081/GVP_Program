@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SimpleStorage {
+   // uint256 public myUint;       
+   // int256 public myInt;         
+   // bool public myBool;           
+    //string public myString;      
+   // address public myAddress;     
+   // bytes32 public myBytes;       
+    uint256 favoriteNumber;
+
+    // Struct for people
+    struct People {
+        uint256 favoriteNumber;
+        string name;
+    }
+
+      //  Arrays 
+   // uint256[] public dynamicArray;     
+   // uint256[3] public fixedArray;         
+
+    // Array to store multiple people
+    People[] public people;
+
+    // Mapping name
+    mapping(string => uint256) public nameToFavoriteNumber;
+
+    // Store a single favorite number
+    function store(uint256 _favoriteNumber) public {
+        favoriteNumber = _favoriteNumber;
+    }
+
+    // Retrieve the stored number
+    function retrieve() public view returns (uint256) {
+        return favoriteNumber;
+    }
+
+    // Add person to array and mapping
+    function addPerson(string memory _name, uint256 _favoriteNumber) public {
+        people.push(People(_favoriteNumber, _name));
+        nameToFavoriteNumber[_name] = _favoriteNumber;
+    }
+
+      // Example of Scope & Visibility
+    // uint256 private secretNumber = 123;  // private → cannot be accessed outside contract
+    
+    // function getSecret() internal view returns (uint256) {
+    //     return secretNumber;              // internal → can be used inside contract
+    // }
+
+    // function revealSecret() public view returns (uint256) {
+    //     return getSecret();               // public → accessible outside
+    // }
+
+
+       // Intro to Storage (permanent) vs Memory (temporary)
+    // string[] public storageArray;
+
+    // function addToStorageArray(string memory _value) public {
+    //     storageArray.push(_value);   // stored permanently
+    // }
+
+    // function readFromMemory() public pure returns (string memory) {
+    //     string memory temp = "Temporary in memory";  // not saved
+    //     return temp;
+    // }
+}
