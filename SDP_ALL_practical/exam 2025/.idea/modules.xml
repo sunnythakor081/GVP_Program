@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/chain/chain.iml" filepath="$PROJECT_DIR$/chain/chain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/exam 2025.iml" filepath="$PROJECT_DIR$/exam 2025.iml" />
+      <module fileurl="file://$PROJECT_DIR$/observer/observer.iml" filepath="$PROJECT_DIR$/observer/observer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/observer2/observer2.iml" filepath="$PROJECT_DIR$/observer2/observer2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/state/state.iml" filepath="$PROJECT_DIR$/state/state.iml" />
+      <module fileurl="file://$PROJECT_DIR$/state2/state2.iml" filepath="$PROJECT_DIR$/state2/state2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/state3/state3.iml" filepath="$PROJECT_DIR$/state3/state3.iml" />
+    </modules>
+  </component>
+</project>
