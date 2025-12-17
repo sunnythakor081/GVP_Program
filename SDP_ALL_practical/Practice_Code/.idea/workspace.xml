@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="23821aca-f70e-467b-9b1c-481a0d8fe8d6" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Class" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="QODANA_PROBLEMS_VIEW_TAB" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2rtnR6mnEB5fiSbxsjNzqcRFpjx" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.AtmClient.executor": "Run",
+    "Application.Bitemain.executor": "Run",
+    "Application.ChainOfR2.Main.executor": "Run",
+    "Application.ChainOfResponsibility.putgetpost.Client.executor": "Run",
+    "Application.Client.executor": "Run",
+    "Application.Client_OS.executor": "Run",
+    "Application.CoffeeClient.executor": "Run",
+    "Application.CoffeeShop.executor": "Run",
+    "Application.CollegeClient.executor": "Run",
+    "Application.College_Client.executor": "Run",
+    "Application.DecoratorPatternDemo.executor": "Run",
+    "Application.FacadePatternClient.executor": "Run",
+    "Application.GamerClient.executor": "Run",
+    "Application.HospitalClient.executor": "Run",
+    "Application.In_main (1).executor": "Run",
+    "Application.In_main.executor": "Run",
+    "Application.It.main.executor": "Run",
+    "Application.Main.executor": "Run",
+    "Application.MygameClient.executor": "Run",
+    "Application.Observer_Pattern.ob3.Client.executor": "Run",
+    "Application.PizzClient.executor": "Run",
+    "Application.PymentClient.executor": "Run",
+    "Application.SchoolLeaveSystem.executor": "Run",
+    "Application.Singledemo.Main.executor": "Run",
+    "Application.State.Client.executor": "Run",
+    "Application.Statemain.executor": "Run",
+    "Application.Strategy.Client.executor": "Run",
+    "Application.TaxPayer.executor": "Run",
+    "Application.TextClient.executor": "Run",
+    "Application.client.Main.executor": "Run",
+    "Application.main.executor": "Run",
+    "Application.state.Client.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "full.screen.before.presentation.mode": "false",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/sunnythakor/Documents/D_folder/GVP/MCA-Sem2/SDP/Practice_Code",
+    "onboarding.tips.debug.path": "D:/GVP/MCA-2/SDP/Practice_Code/src/Main.java",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.keymap"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="newhash" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.SchoolLeaveSystem">
+    <configuration name="ChainOfResponsibility.putgetpost.Client" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="ChainOfResponsibility.putgetpost.Client" />
+      <module name="Practice_Code" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="ChainOfResponsibility.putgetpost.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Client" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Proxy_Design_Pattern.Client" />
+      <module name="Practice_Code" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="Proxy_Design_Pattern.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CoffeeClient" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Decorator.democoffee.coffee.CoffeeClient" />
+      <module name="Practice_Code" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="Decorator.democoffee.coffee.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="College_Client" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="AbStract_factory.College_Client" />
+      <module name="Practice_Code" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="AbStract_factory.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SchoolLeaveSystem" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="ChainOfResponsibility.mydemo.SchoolLeaveSystem" />
+      <module name="Practice_Code" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="ChainOfResponsibility.mydemo.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.SchoolLeaveSystem" />
+        <item itemvalue="Application.ChainOfResponsibility.putgetpost.Client" />
+        <item itemvalue="Application.College_Client" />
+        <item itemvalue="Application.Client" />
+        <item itemvalue="Application.CoffeeClient" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="23821aca-f70e-467b-9b1c-481a0d8fe8d6" name="Changes" comment="" />
+      <created>1737387235206</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1737387235206</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/ShallowGameGOF/GamerClient.java</url>
+          <line>12</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
