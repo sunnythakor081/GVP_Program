@@ -1,0 +1,345 @@
+
+
+
+Abstract Factory Pattern — Consequences - kit
+
+Intent:
+
+Provide an interface to create families of related objects without specifying their concrete classes.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Consistency maintained
+→ Same family objects are used together (no mixing of styles).
+Loose coupling
+→ Client code depends on interfaces, not concrete classes.
+Easy to change product family
+→ Switch factory (e.g., Light → Dark) without changing client code.
+Supports Open/Closed Principle
+→ New product families can be added easily.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+More classes
+→ Many interfaces and factory classes increase complexity.
+Hard to add new product type
+→ Adding a new product (e.g., Slider) requires changes in all factories.
+Overkill for simple systems
+→ Not useful if only one product or simple creation is needed.
+
+
+
+Factory Method Pattern — Consequences-Virtual Constructor
+
+Intent:
+Define an interface for creating an object, but let subclasses decide which class to instantiate.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Loose coupling
+→ Client code depends on interface, not concrete classes.
+Eliminates if-else logic
+→ Object creation logic moved to subclasses.
+Easy to add new products
+→ Add new subclass without changing existing code.
+Follows Open/Closed Principle
+→ Code is open for extension, closed for modification.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+More subclasses
+→ Each new product requires a new subclass.
+Increased complexity
+→ Class hierarchy becomes larger.
+Hard to understand for beginners
+→ Object creation is not straightforward.
+
+
+
+Singleton Pattern — Consequences-Single Instance
+
+Intent:
+
+Ensure that a class has only one instance and provide a global access point to it.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Single instance control
+→ Only one object exists in the entire application.
+Global access
+→ Same instance can be accessed from anywhere.
+Resource saving
+→ Useful for heavy objects like DB connection, logger.
+Consistency maintained
+→ Same configuration/data used everywhere.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+Global state problem
+→ Acts like global variable, hard to track changes.
+Difficult to test
+→ Mocking and unit testing become harder.
+Hidden dependencies
+→ Classes depend on Singleton without clear reference.
+Multithreading issues
+→ Improper implementation can create multiple instances.
+
+
+
+
+
+
+Decorator Pattern — Consequences-Wrapper
+
+Intent:
+
+Attach additional responsibilities to an object dynamically without changing its original class.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Dynamic behavior addition
+→ Features can be added at runtime.
+No class modification
+→ Original class remains unchanged.
+Avoids subclass explosion
+→ No need to create many subclasses for combinations.
+Follows Open/Closed Principle
+→ Extend behavior without changing existing code.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+Many small classes
+→ Increases number of classes.
+Complex object structure
+→ Multiple wrappers make debugging difficult.
+Hard to understand flow
+→ Behavior is distributed across decorators.
+
+
+
+Facade Pattern — Consequences-Unified Interface
+
+Intent:
+Provide a simple, unified interface to a complex subsystem.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Simplifies usage
+→ Client interacts with one simple interface.
+Hides system complexity
+→ Subsystem details are not exposed to the client.
+Loose coupling
+→ Client is independent of subsystem classes.
+Easy to maintain
+→ Changes in subsystem do not affect client code.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+Limited functionality access
+→ Client cannot use all subsystem features directly.
+Facade can become large
+→ Too many responsibilities may overload the facade.
+Not suitable for small systems
+→ Overhead if subsystem is already simple.
+
+
+
+
+
+
+Proxy Pattern — Consequences-Surrogate
+
+Intent:
+
+Provide a substitute or placeholder for another object to control access to it.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Access control
+→ Proxy checks permissions before accessing real object.
+Lazy loading
+→ Real object is created only when needed.
+Security & logging
+→ Proxy can add security, logging, caching.
+Remote access support
+→ Proxy represents remote objects locally.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+Extra layer
+→ Adds additional level of indirection.
+Performance overhead
+→ Extra call through proxy may slow execution.
+Increased complexity
+→ More classes to manage.
+
+
+
+Chain of Responsibility Pattern — Consequences-Responsibility Chain
+
+Intent:
+
+Avoid coupling the sender of a request to its receiver by giving multiple objects a chance to handle the request.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Removes if-else chains
+→ Request handling logic is separated into handlers.
+Loose coupling
+→ Sender does not know which handler will process the request.
+Easy to add new handlers
+→ New handler can be added without changing existing code.
+Flexible request handling
+→ Order of handlers can be changed dynamically.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+Request may go unhandled
+→ If no handler processes it.
+Debugging is difficult
+→ Request path is not always clear.
+Performance overhead
+→ Request may pass through many handlers.
+
+
+
+Observer Pattern — Consequences-Publish–Subscribe
+
+Intent:
+
+Define a one-to-many dependency so that when one object changes state, all its dependents are notified automatically.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Automatic updates
+→ Observers get notified without manual calls.
+Loose coupling
+→ Subject does not depend on concrete observer classes.
+Supports event-driven systems
+→ Ideal for notifications and listeners.
+Easy to add/remove observers
+→ Observers can be added or removed at runtime.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+Unexpected updates
+→ Observers may be notified without knowing who triggered it.
+Performance issues
+→ Too many observers can slow the system.
+Memory leak risk
+→ Observers not removed properly stay registered.
+
+
+
+State Pattern — Consequences-Object for State
+
+Intent:
+
+Allow an object to change its behavior when its internal state changes, as if it were a different object.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Removes large if-else / switch
+→ Each state handles its own behavior.
+Encapsulates state-specific behavior
+→ Behavior is localized in state classes.
+Easy to add new states
+→ New state can be added without changing existing logic.
+Improves maintainability
+→ Code is cleaner and easier to extend.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+Increases number of classes
+→ Each state requires a separate class.
+Complex design for simple cases
+→ Overkill if only 2–3 states.
+State transition logic can be unclear
+→ Hard to track flow between states.
+
+
+
+
+
+
+Strategy Pattern — Consequences-Policy Pattern
+
+Intent:
+Define a family of algorithms, encapsulate each one, and make them interchangeable at runtime.
+
+
+
+
+✅ Advantages (Positive Consequences)
+
+Removes if-else / switch logic
+→ Each algorithm is in a separate strategy class.
+Algorithms can change at runtime
+→ Strategy can be selected dynamically.
+Follows Open/Closed Principle
+→ New strategies can be added without modifying existing code.
+Improves code flexibility and reuse
+→ Algorithms are reusable and independent.
+
+
+
+❌ Disadvantages (Negative Consequences)
+
+More classes
+→ Each algorithm requires a separate class.
+Client must know strategies
+→ Client needs to choose which strategy to use.
+Overhead for simple logic
+→ Not useful if algorithm variation is minimal.
+
+
+
+
+
+
+
