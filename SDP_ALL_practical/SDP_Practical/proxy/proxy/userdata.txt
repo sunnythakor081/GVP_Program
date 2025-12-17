@@ -1,2 +1,0 @@
-krunal,12345,admin
-sandip,12345,user
