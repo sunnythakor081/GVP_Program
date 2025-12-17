@@ -3,12 +3,22 @@ package ChainOfResponsibility.putgetpost;
 public class Client {
     public static void main(String[] args) {
 
-        Handlermy h = new Get();
-        Handlermy n = new Post();
-        Handlermy ou = new Put();
+        Handlermy get = new Get();
+        Handlermy post = new Post();
+        Handlermy put = new Put();
 
-        h.sethandler(n);
-        n.sethandler(ou);
+        get.sethandler(post);
+        post.sethandler(put);
+
+
+        // Test requests
+        get.handle("GET");
+        get.handle("POST");
+        get.handle("PUT");
+        get.handle("DELETE");
+
+
+
 
 
 

@@ -5,18 +5,18 @@ public class Post implements Handlermy{
     @Override
     public void sethandler(Handlermy handlermy) {
 
-        this.handlermy = new Get();
+        this.handlermy = handlermy;
 
     }
 
     @Override
-    public void handler(Exception exception) {
-
-        if(exception.equals("Post")){
-            System.out.printf("i am Put");
+    public void handle(String request) {
+        if ("POST".equalsIgnoreCase(request)) {
+            System.out.println("Handled by POST");
         } else if (handlermy != null) {
-            handlermy.handler(exception);
-
+            handlermy.handle(request);
         }
     }
+
+
 }

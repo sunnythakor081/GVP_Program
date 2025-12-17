@@ -2,6 +2,7 @@ package ChainOfResponsibility.putgetpost;
 
 public class Get implements Handlermy{
     private Handlermy handlermy;
+
     @Override
     public void sethandler(Handlermy handlermy) {
         this.handlermy = handlermy;
@@ -9,14 +10,14 @@ public class Get implements Handlermy{
     }
 
     @Override
-    public void handler(Exception exception) {
-
-        if(exception.equals("Get")){
-            System.out.printf("I am Get method");
-
-        }else if(handlermy != null){
-             handlermy.handler(exception);
-
+    public void handle(String request) {
+        if ("GET".equalsIgnoreCase(request)) {
+            System.out.println("Handled by GET");
+        } else if (handlermy != null) {
+            handlermy.handle(request);
         }
+
     }
+
+
 }
