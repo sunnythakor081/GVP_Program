@@ -1,0 +1,409 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2867
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\froman\fcharset0 Times-Roman;\f2\fmodern\fcharset0 Courier;
+\f3\fmodern\fcharset0 Courier-Bold;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww29200\viewh18460\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 TaskMaster/\
+\uc0\u9474 \
+\uc0\u9500 \u9472 \u9472  src/main/java\
+\uc0\u9474    \u9492 \u9472 \u9472  com/taskmaster\
+\uc0\u9474        \u9500 \u9472 \u9472  controller\
+\uc0\u9474        \u9474    \u9492 \u9472 \u9472  TaskController.java\
+\uc0\u9474        \u9500 \u9472 \u9472  dao\
+\uc0\u9474        \u9474    \u9500 \u9472 \u9472  TaskDao.java\
+\uc0\u9474        \u9474    \u9492 \u9472 \u9472  TaskDaoImpl.java\
+\uc0\u9474        \u9500 \u9472 \u9472  service\
+\uc0\u9474        \u9474    \u9500 \u9472 \u9472  TaskService.java\
+\uc0\u9474        \u9474    \u9492 \u9472 \u9472  TaskServiceImpl.java\
+\uc0\u9474        \u9492 \u9472 \u9472  model\
+\uc0\u9474            \u9492 \u9472 \u9472  Task.java\
+\uc0\u9474 \
+\uc0\u9500 \u9472 \u9472  src/main/resources\
+\uc0\u9474    \u9492 \u9472 \u9472  hibernate.cfg.xml\
+\uc0\u9474 \
+\uc0\u9500 \u9472 \u9472  src/main/webapp\
+\uc0\u9474    \u9500 \u9472 \u9472  WEB-INF\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  views\
+\uc0\u9474    \u9474    \u9474    \u9500 \u9472 \u9472  task-list.jsp\
+\uc0\u9474    \u9474    \u9474    \u9492 \u9472 \u9472  task-form.jsp\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  dispatcher-servlet.xml\
+\uc0\u9474    \u9492 \u9472 \u9472  index.jsp\
+\uc0\u9474 \
+\uc0\u9492 \u9472 \u9472  pom.xml\
+\
+\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 pom.xml\
+
+\f0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 <project xmlns="http://maven.apache.org/POM/4.0.0"\
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0\
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">\
+\
+    <modelVersion>4.0.0</modelVersion>\
+\
+    <groupId>com.taskmaster</groupId>\
+    <artifactId>taskmaster</artifactId>\
+    <version>1.0</version>\
+    <packaging>war</packaging>\
+\
+    <properties>\
+        <java.version>21</java.version>\
+        <spring.version>6.1.1</spring.version>\
+        <hibernate.version>6.4.1.Final</hibernate.version>\
+    </properties>\
+\
+    <dependencies>\
+\
+        <!-- Spring MVC -->\
+        <dependency>\
+            <groupId>org.springframework</groupId>\
+            <artifactId>spring-webmvc</artifactId>\
+            <version>$\{spring.version\}</version>\
+        </dependency>\
+\
+        <!-- Spring ORM -->\
+        <dependency>\
+            <groupId>org.springframework</groupId>\
+            <artifactId>spring-orm</artifactId>\
+            <version>$\{spring.version\}</version>\
+        </dependency>\
+\
+        <!-- Hibernate -->\
+        <dependency>\
+            <groupId>org.hibernate.orm</groupId>\
+            <artifactId>hibernate-core</artifactId>\
+            <version>$\{hibernate.version\}</version>\
+        </dependency>\
+\
+        <!-- MySQL -->\
+        <dependency>\
+            <groupId>com.mysql</groupId>\
+            <artifactId>mysql-connector-j</artifactId>\
+            <version>8.3.0</version>\
+        </dependency>\
+\
+        <!-- JSTL -->\
+        <dependency>\
+            <groupId>jakarta.servlet.jsp.jstl</groupId>\
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>\
+            <version>3.0.0</version>\
+        </dependency>\
+\
+        <!-- Servlet API -->\
+        <dependency>\
+            <groupId>jakarta.servlet</groupId>\
+            <artifactId>jakarta.servlet-api</artifactId>\
+            <version>6.0.0</version>\
+            <scope>provided</scope>\
+        </dependency>\
+\
+    </dependencies>\
+</project>\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Entity \'96 
+\f2\fs26 \strokec2 Task.java\
+package com.taskmaster.model;\
+\
+import jakarta.persistence.*;\
+\
+@Entity\
+@Table(name = "task")\
+public class Task \{\
+\
+    @Id\
+    @GeneratedValue(strategy = GenerationType.IDENTITY)\
+    private int id;\
+\
+    private String title;\
+    private String status;\
+\
+    // getters & setters\
+    public int getId() \{ return id; \}\
+    public void setId(int id) \{ this.id = id; \}\
+\
+    public String getTitle() \{ return title; \}\
+    public void setTitle(String title) \{ this.title = title; \}\
+\
+    public String getStatus() \{ return status; \}\
+    public void setStatus(String status) \{ this.status = status; \}\
+\}\
+
+\f0\fs24 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+\
+
+\f1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Hibernate Config \'96 
+\f2\fs26 \strokec2 hibernate.cfg.xml\
+\
+<!DOCTYPE hibernate-configuration PUBLIC\
+ "-//Hibernate/Hibernate Configuration DTD 3.0//EN"\
+ "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">\
+\
+<hibernate-configuration>\
+ <session-factory>\
+\
+  <property name="hibernate.connection.driver_class">\
+      com.mysql.cj.jdbc.Driver\
+  </property>\
+\
+  <property name="hibernate.connection.url">\
+      jdbc:mysql://localhost:3306/taskmaster\
+  </property>\
+\
+  <property name="hibernate.connection.username">root</property>\
+  <property name="hibernate.connection.password">root</property>\
+\
+  <property name="hibernate.dialect">\
+      org.hibernate.dialect.MySQLDialect\
+  </property>\
+\
+  <property name="hibernate.hbm2ddl.auto">update</property>\
+  <property name="hibernate.show_sql">true</property>\
+\
+  <property name="hibernate.current_session_context_class">thread</property>\
+\
+  <mapping class="com.taskmaster.model.Task"/>\
+\
+ </session-factory>\
+</hibernate-configuration>\
+
+\f1\fs24 \strokec2 \
+\
+TaskDao.java\
+package com.taskmaster.dao;\
+\
+import java.util.List;\
+import com.taskmaster.model.Task;\
+\
+public interface TaskDao \{\
+    void save(Task task);\
+    List<Task> list();\
+    Task get(int id);\
+    void delete(int id);\
+\}\
+\
+TaskDaoImpl.java\
+package com.taskmaster.dao;\
+\
+import java.util.List;\
+import org.hibernate.SessionFactory;\
+import org.springframework.beans.factory.annotation.Autowired;\
+import org.springframework.stereotype.Repository;\
+import com.taskmaster.model.Task;\
+\
+@Repository\
+public class TaskDaoImpl implements TaskDao \{\
+\
+    @Autowired\
+    private SessionFactory sessionFactory;\
+\
+    public void save(Task task) \{\
+        sessionFactory.getCurrentSession().saveOrUpdate(task);\
+    \}\
+\
+    public List<Task> list() \{\
+        return sessionFactory.getCurrentSession()\
+                .createQuery("from Task", Task.class)\
+                .list();\
+    \}\
+\
+    public Task get(int id) \{\
+        return sessionFactory.getCurrentSession().get(Task.class, id);\
+    \}\
+\
+    public void delete(int id) \{\
+        Task task = get(id);\
+        sessionFactory.getCurrentSession().delete(task);\
+    \}\
+\}\
+\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f3\b\fs30\fsmilli15210 \cf0 \strokec2 TaskService.java
+\f2\b0\fs26 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf0 package com.taskmaster.service;\
+\
+import java.util.List;\
+import com.taskmaster.model.Task;\
+\
+public interface TaskService \{\
+    void save(Task task);\
+    List<Task> list();\
+    Task get(int id);\
+    void delete(int id);\
+\}\
+\
+\
+\
+
+\f1 \strokec2 TaskServiceImpl\
+\
+package com.taskmaster.service;\
+\
+import java.util.List;\
+import org.springframework.beans.factory.annotation.Autowired;\
+import org.springframework.stereotype.Service;\
+import org.springframework.transaction.annotation.Transactional;\
+import com.taskmaster.dao.TaskDao;\
+import com.taskmaster.model.Task;\
+\
+@Service\
+@Transactional\
+public class TaskServiceImpl implements TaskService \{\
+\
+    @Autowired\
+    private TaskDao taskDao;\
+\
+    public void save(Task task) \{\
+        taskDao.save(task);\
+    \}\
+\
+    public List<Task> list() \{\
+        return taskDao.list();\
+    \}\
+\
+    public Task get(int id) \{\
+        return taskDao.get(id);\
+    \}\
+\
+    public void delete(int id) \{\
+        taskDao.delete(id);\
+    \}\
+\}\
+
+\f0 \strokec2 \
+
+\f1 \strokec2 TaskController\
+\
+package com.taskmaster.controller;\
+\
+import org.springframework.beans.factory.annotation.Autowired;\
+import org.springframework.stereotype.Controller;\
+import org.springframework.ui.Model;\
+import org.springframework.web.bind.annotation.*;\
+import com.taskmaster.model.Task;\
+import com.taskmaster.service.TaskService;\
+\
+@Controller\
+@RequestMapping("/task")\
+public class TaskController \{\
+\
+    @Autowired\
+    private TaskService service;\
+\
+    @GetMapping("/list")\
+    public String list(Model model) \{\
+        model.addAttribute("tasks", service.list());\
+        return "task-list";\
+    \}\
+\
+    @GetMapping("/add")\
+    public String add(Model model) \{\
+        model.addAttribute("task", new Task());\
+        return "task-form";\
+    \}\
+\
+    @PostMapping("/save")\
+    public String save(@ModelAttribute Task task) \{\
+        service.save(task);\
+        return "redirect:/task/list";\
+    \}\
+\
+    @GetMapping("/delete/\{id\}")\
+    public String delete(@PathVariable int id) \{\
+        service.delete(id);\
+        return "redirect:/task/list";\
+    \}\
+\}\
+\
+\
+\
+dispatcher-servlet.xml\
+<beans xmlns="http://www.springframework.org/schema/beans"\
+       xmlns:context="http://www.springframework.org/schema/context"\
+       xmlns:mvc="http://www.springframework.org/schema/mvc"\
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\
+       xsi:schemaLocation="\
+       http://www.springframework.org/schema/beans\
+       https://www.springframework.org/schema/beans/spring-beans.xsd\
+       http://www.springframework.org/schema/context\
+       https://www.springframework.org/schema/context/spring-context.xsd\
+       http://www.springframework.org/schema/mvc\
+       https://www.springframework.org/schema/mvc/spring-mvc.xsd">\
+\
+    <context:component-scan base-package="com.taskmaster"/>\
+    <mvc:annotation-driven/>\
+\
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">\
+        <property name="prefix" value="/WEB-INF/views/"/>\
+        <property name="suffix" value=".jsp"/>\
+    </bean>\
+\
+    <bean id="sessionFactory"\
+          class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">\
+        <property name="configLocation" value="classpath:hibernate.cfg.xml"/>\
+    </bean>\
+\
+    <bean id="transactionManager"\
+          class="org.springframework.orm.hibernate5.HibernateTransactionManager">\
+        <property name="sessionFactory" ref="sessionFactory"/>\
+    </bean>\
+\
+</beans>\
+\
+task-list.jsp\
+<%@ taglib uri="jakarta.tags.core" prefix="c" %>\
+\
+<h2>Task List</h2>\
+<a href="add">Add Task</a>\
+\
+<table border="1">\
+<tr>\
+<th>ID</th><th>Title</th><th>Status</th><th>Action</th>\
+</tr>\
+\
+<c:forEach var="t" items="$\{tasks\}">\
+<tr>\
+<td>$\{t.id\}</td>\
+<td>$\{t.title\}</td>\
+<td>$\{t.status\}</td>\
+<td>\
+<a href="delete/$\{t.id\}">Delete</a>\
+</td>\
+</tr>\
+</c:forEach>\
+</table>\
+\
+task-form.jsp\
+<form action="save" method="post">\
+Title: <input type="text" name="title"/><br/>\
+Status: <input type="text" name="status"/><br/>\
+<button type="submit">Save</button>\
+</form>\
+\
+\
+http://localhost:8080/taskmaster/task/list\
+
+\f0 \strokec2 \
+\kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+}
