@@ -1,0 +1,2449 @@
+https://okr.centili.com/objectives/create
+
+
+{
+    "objectiveId": -1,
+    "objective": "sdfbnm,.",
+    "description": "tedfdfgdf",
+    "ownerId": 175200,
+    "teamId": 87,
+    "statusId": 2,
+    "startDate": "03/10/2026",
+    "endDate": "03/17/2026",
+    "parentObjectiveId": -1,
+    "keyResults": [],
+    "subscriptionId": 9329,
+    "verticalId": 18,
+    "appId": 2882,
+    "loginEmployeeId": 88880
+}
+
+
+
+
+{
+    "objectiveId": -1,
+    "objective": "sdfbnm,.",
+    "description": "tedfdfgdf",
+    "ownerId": 175200,
+    "teamId": 87,
+    "statusId": 2,
+    "startDate": "03/10/2026",
+    "endDate": "03/17/2026",
+    "parentObjectiveId": -1,
+    "keyResults": null,
+    "subscriptionId": 9329,
+    "verticalId": 18,
+    "appId": 2882,
+    "loginEmployeeId": 88880
+}
+
+
+
+
+package com.tristatehvac.ciright.api.service;
+
+import com.tristatehvac.ciright.api.model.ApiResponseModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRCommonModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRKeyResultModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRObjectiveModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRTeamMemberModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRTeamModel;
+import com.tristatehvac.ciright.exception.CirightException;
+import com.tristatehvac.ciright.restful.exception.FieldAlreadyExistException;
+import com.tristatehvac.ciright.restful.exception.InvalidParameterException;
+
+public interface CirightOKRService {
+
+    public ApiResponseModel<?> getGoalComboList(CirightOKRCommonModel model)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> getGoalStatusComboList(
+            CirightOKRCommonModel model)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> getUnitOfMeasurementComboList(
+            CirightOKRCommonModel model)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> validateObjectiveOrderNo(
+            CirightOKRObjectiveModel model)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> addOrUpdateObjective(
+            CirightOKRObjectiveModel model)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> getObjectiveList(CirightOKRObjectiveModel model)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> updateObjectiveStatus(Long objectiveId)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> addOrUpdateObjectiveKeyResult(
+            CirightOKRKeyResultModel model)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> deleteKeyResultStatus(Long keyResultId)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> addNewTeam(CirightOKRTeamModel model)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> addOrUpdateTeamMember(
+            CirightOKRTeamMemberModel model) throws CirightException,
+            InvalidParameterException, FieldAlreadyExistException;
+
+    public ApiResponseModel<?> getTeamMemberList(
+            CirightOKRTeamMemberModel model)
+            throws CirightException, InvalidParameterException;
+
+    public ApiResponseModel<?> updateMembersTeam(
+            CirightOKRTeamMemberModel model) throws CirightException,
+            InvalidParameterException, FieldAlreadyExistException;
+
+    public ApiResponseModel<?> deleteMembersTeam(
+            CirightOKRTeamMemberModel model)
+            throws CirightException, InvalidParameterException;
+}
+
+
+
+package com.tristatehvac.ciright.api.service.serviceImpl;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import com.tristatehvac.ciright.api.model.ApiResponseModel;
+import com.tristatehvac.ciright.api.model.MapModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRCommonModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRKeyResultModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRObjectiveModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRTeamMemberModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRTeamModel;
+import com.tristatehvac.ciright.api.service.CirightOKRService;
+import com.tristatehvac.ciright.command.TblEmployee;
+import com.tristatehvac.ciright.command.TblEmployeeActiveTeam;
+import com.tristatehvac.ciright.command.TblEmployeeTeam;
+import com.tristatehvac.ciright.command.TblGoalKeyResult;
+import com.tristatehvac.ciright.command.TblGoalStatus;
+import com.tristatehvac.ciright.command.TblGoals;
+import com.tristatehvac.ciright.command.TblUnitOfMeasure;
+import com.tristatehvac.ciright.exception.CirightException;
+import com.tristatehvac.ciright.persistence.QueryOptions;
+import com.tristatehvac.ciright.restful.exception.FieldAlreadyExistException;
+import com.tristatehvac.ciright.restful.exception.InvalidParameterException;
+import com.tristatehvac.ciright.service.CommonService;
+import com.tristatehvac.ciright.service.FacadeLookup;
+import com.tristatehvac.ciright.util.UtilsConfigConstants;
+import com.tristatehvac.ciright.util.UtilsQueryParameterConstants;
+
+public class CirightOKRServiceImpl implements CirightOKRService {
+
+    private static ResourceBundle constantBundle = ResourceBundle
+            .getBundle("message");
+
+    final SimpleDateFormat dateTimeFormat = new SimpleDateFormat(
+            "MM/dd/yyyy HH:mm:ss");
+    final SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+    final SimpleDateFormat dateFormat = new SimpleDateFormat(
+            "MM/dd/yyyy hh:mm a");
+    final SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    final String requestURL = constantBundle.getString("CIRIGHT_URL");
+
+    private FacadeLookup facadeLookup;
+    private CommonService commonService;
+
+    public FacadeLookup getFacadeLookup() {
+        return facadeLookup;
+    }
+
+    public void setFacadeLookup(final FacadeLookup facadeLookup) {
+        this.facadeLookup = facadeLookup;
+    }
+
+    public CommonService getCommonService() {
+        return commonService;
+    }
+
+    public void setCommonService(final CommonService commonService) {
+        this.commonService = commonService;
+    }
+
+    @Override
+    public ApiResponseModel<?> getGoalComboList(CirightOKRCommonModel model)
+            throws CirightException, InvalidParameterException {
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null || model.getVerticalId() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        final ApiResponseModel<List<MapModel>> response = new ApiResponseModel<List<MapModel>>();
+        final List<MapModel> models = new ArrayList<MapModel>();
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put("custId", model.getSubscriptionId());
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID,
+                model.getVerticalId());
+
+        List<Object[]> resultList = getFacadeLookup().getPersistenceFacade()
+                .findByNamedQueryC("get.active.goal.list",
+                        new QueryOptions(options), Object[].class);
+
+        if (resultList != null && !resultList.isEmpty()) {
+            for (Object[] obj : resultList) {
+                MapModel mapModel = new MapModel();
+                mapModel.setKey(Long.valueOf(obj[0].toString()));
+                mapModel.setValue(obj[1] != null ? obj[1].toString() : "");
+                models.add(mapModel);
+            }
+        }
+
+        response.setStatus(true);
+        response.setMessage("success");
+        response.setData(models);
+        return response;
+    }
+
+    @Override
+    public ApiResponseModel<?> getGoalStatusComboList(
+            CirightOKRCommonModel model)
+            throws CirightException, InvalidParameterException {
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null || model.getVerticalId() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        final ApiResponseModel<List<MapModel>> response = new ApiResponseModel<List<MapModel>>();
+        final List<MapModel> models = new ArrayList<MapModel>();
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put(UtilsQueryParameterConstants.SUBSCRIPTION_ID,
+                model.getSubscriptionId());
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID,
+                model.getVerticalId());
+
+        List<Object[]> resultList = getFacadeLookup().getPersistenceFacade()
+                .findByNamedQueryC("get.active.goal.status.list",
+                        new QueryOptions(options), Object[].class);
+
+        if (resultList != null && !resultList.isEmpty()) {
+            for (Object[] obj : resultList) {
+                MapModel mapModel = new MapModel();
+                mapModel.setKey(Long.valueOf(obj[0].toString()));
+                mapModel.setValue(obj[1] != null ? obj[1].toString() : "");
+                models.add(mapModel);
+            }
+        }
+
+        response.setStatus(true);
+        response.setMessage("success");
+        response.setData(models);
+        return response;
+    }
+
+    @Override
+    public ApiResponseModel<?> getUnitOfMeasurementComboList(
+            CirightOKRCommonModel model)
+            throws CirightException, InvalidParameterException {
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null || model.getVerticalId() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        final ApiResponseModel<List<MapModel>> response = new ApiResponseModel<List<MapModel>>();
+        final List<MapModel> models = new ArrayList<MapModel>();
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put("custId", model.getSubscriptionId());
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID,
+                model.getVerticalId());
+
+        List<Object[]> resultList = getFacadeLookup().getPersistenceFacade()
+                .findByNamedQueryC("get.active.unit.of.measure.list",
+                        new QueryOptions(options), Object[].class);
+
+        if (resultList != null && !resultList.isEmpty()) {
+            for (Object[] obj : resultList) {
+                MapModel mapModel = new MapModel();
+                mapModel.setKey(Long.valueOf(obj[0].toString()));
+                mapModel.setValue(obj[1] != null ? obj[1].toString() : "");
+                models.add(mapModel);
+            }
+        }
+
+        response.setStatus(true);
+        response.setMessage("success");
+        response.setData(models);
+        return response;
+    }
+
+    @Override
+    public ApiResponseModel<?> validateObjectiveOrderNo(
+            CirightOKRObjectiveModel model)
+            throws CirightException, InvalidParameterException {
+
+        if (model.getOrderNo() == null || model.getOrderNo().intValue() == 0) {
+            throw new InvalidParameterException("Order No is not available",
+                    "orderNo");
+        }
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId().longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null
+                || model.getVerticalId().longValue() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        if (model.getAppId() == null || model.getAppId().longValue() == -1) {
+            throw new InvalidParameterException("App Id is not available",
+                    "appId");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "loginEmployeeId");
+        }
+
+        final ApiResponseModel<?> apiResponse = new ApiResponseModel<>();
+        Short flag = 0;
+        List<Object[]> resultList = new ArrayList<>();
+
+        final Map<String, Object> options = new HashMap<>();
+        options.put(UtilsQueryParameterConstants.SUBSCRIPTION_ID,
+                model.getSubscriptionId());
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID,
+                model.getVerticalId());
+        options.put(UtilsQueryParameterConstants.ORDER_NO, model.getOrderNo());
+
+        if (model.getObjectiveId() == null
+                || model.getObjectiveId().longValue() == -1) {
+            resultList = getFacadeLookup().getPersistenceFacade()
+                    .findByNamedQueryC("validate.goal.order.no.by.id.on.add",
+                            new QueryOptions(options));
+
+        } else {
+            options.put(UtilsQueryParameterConstants.GOAL_ID,
+                    model.getObjectiveId());
+            resultList = getFacadeLookup().getPersistenceFacade()
+                    .findByNamedQueryC("validate.goal.order.no.by.id.on.edit",
+                            new QueryOptions(options));
+
+        }
+
+        if (resultList != null && !resultList.isEmpty()) {
+            flag = 1;
+        }
+
+        if (flag == 1) {
+            apiResponse.setStatus(false);
+            apiResponse.setMessage("Order No is invalid");
+        } else {
+            apiResponse.setStatus(true);
+            apiResponse.setMessage("Order No is valid");
+        }
+        apiResponse.setData(null);
+        return apiResponse;
+    }
+
+    @Override
+    public ApiResponseModel<?> addOrUpdateObjective(
+            CirightOKRObjectiveModel model)
+            throws InvalidParameterException, CirightException {
+
+        if (model.getObjective() == null || model.getObjective().equals("")) {
+            throw new InvalidParameterException("Objective is not available",
+                    "objective");
+        }
+
+        if (model.getOwnerId() == null
+                || model.getOwnerId().longValue() == -1) {
+            throw new InvalidParameterException("Owner Id is not available",
+                    "ownerId");
+        }
+
+        if (model.getStatusId() == null
+                || model.getStatusId().longValue() == -1) {
+            throw new InvalidParameterException("Status Id is not available",
+                    "statusId");
+        }
+
+        if (model.getStartDate() == null || model.getStartDate().equals("")) {
+            throw new InvalidParameterException("Start Date is not available",
+                    "startDate");
+        }
+
+        if (model.getEndDate() == null || model.getEndDate().equals("")) {
+            throw new InvalidParameterException("End Date is not available",
+                    "endDate");
+        }
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId().longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null
+                || model.getVerticalId().longValue() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        if (model.getAppId() == null || model.getAppId().longValue() == -1) {
+            throw new InvalidParameterException("App Id is not available",
+                    "appId");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "loginEmployeeId");
+        }
+
+        final ApiResponseModel<?> apiResponse = new ApiResponseModel<>();
+
+        final TblGoals tblGoalObjective = new TblGoals();
+
+        final TblEmployee tblEmployeeCreatedBy = new TblEmployee();
+        tblEmployeeCreatedBy.setId(model.getLoginEmployeeId());
+
+        if (model.getObjectiveId() != null
+                && model.getObjectiveId().longValue() != -1) {
+
+            tblGoalObjective.setId(model.getObjectiveId());
+            getFacadeLookup().getPersistenceFacade().load(tblGoalObjective);
+
+            tblGoalObjective.setUpdatedDate(new Date());
+            tblGoalObjective.setTblEmployeeByUpdatedBy(tblEmployeeCreatedBy);
+        } else {
+            tblGoalObjective.setCreatedDate(new Date());
+            tblGoalObjective.setTblEmployeeByCreatedBy(tblEmployeeCreatedBy);
+
+            tblGoalObjective.setIsActive(UtilsConfigConstants.ACTIVE_STATUS);
+
+        }
+
+        tblGoalObjective.setGoalName(model.getObjective());
+
+        Date startDate = null;
+        try {
+            startDate = dateTimeFormat
+                    .parse(model.getStartDate() + " 00:00:00");
+
+        } catch (final ParseException e1) {
+            throw new InvalidParameterException("Start Date is invalid",
+                    "startDate");
+        }
+
+        Date endDate = null;
+        try {
+            endDate = dateTimeFormat.parse(model.getEndDate() + " 23:59:59");
+
+        } catch (final ParseException e1) {
+            throw new InvalidParameterException("End Date is invalid",
+                    "endDate");
+        }
+
+        tblGoalObjective.setStartDate(startDate);
+        tblGoalObjective.setCompletionDate(endDate);
+
+        tblGoalObjective.setGoalDescription(
+                model.getDescription() != null ? model.getDescription() : null);
+
+        final TblEmployee tblEmployeeOwner = new TblEmployee();
+        tblEmployeeOwner.setId(model.getOwnerId());
+        tblGoalObjective.setTblEmployeeByManager(tblEmployeeOwner);
+
+        final TblGoalStatus tblGoalStatus = new TblGoalStatus();
+        tblGoalStatus.setId(model.getStatusId());
+        tblGoalObjective.setTblGoalStatus(tblGoalStatus);
+
+        if (model.getTeamId() != null && model.getTeamId() != -1L) {
+
+            final TblEmployeeTeam tblEmployeeTeam = new TblEmployeeTeam();
+            tblEmployeeTeam.setId(model.getTeamId());
+            tblGoalObjective.setTblTeam(tblEmployeeTeam);
+        } else {
+
+            tblGoalObjective.setTblTeam(null);
+        }
+
+        if (model.getParentObjectiveId() != null
+                && model.getParentObjectiveId() != -1L) {
+
+            final TblGoals TblGoalsMaster = new TblGoals();
+            TblGoalsMaster.setId(model.getParentObjectiveId());
+            tblGoalObjective.setTblGoals(TblGoalsMaster);
+        } else {
+
+            tblGoalObjective.setTblGoals(null);
+        }
+
+        getFacadeLookup().getPersistenceFacade().update(tblGoalObjective);
+
+        for (CirightOKRKeyResultModel keyResultModel : model.getKeyResults()) {
+
+            final TblGoalKeyResult tblGoalKeyResult = new TblGoalKeyResult();
+
+            if (keyResultModel.getKeyResultId() != null
+                    && keyResultModel.getKeyResultId().longValue() != -1) {
+
+                tblGoalKeyResult.setId(keyResultModel.getKeyResultId());
+                getFacadeLookup().getPersistenceFacade().load(tblGoalKeyResult);
+
+                tblGoalKeyResult.setUpdatedDate(new Date());
+                tblGoalKeyResult
+                        .setTblEmployeeByUpdatedBy(tblEmployeeCreatedBy);
+            } else {
+
+                tblGoalKeyResult.setCreatedDate(new Date());
+                tblGoalKeyResult
+                        .setTblEmployeeByCreatedBy(tblEmployeeCreatedBy);
+                tblGoalKeyResult.setStatus(UtilsConfigConstants.ACTIVE_STATUS);
+            }
+
+            tblGoalKeyResult.setTblGoals(tblGoalObjective);
+
+            tblGoalKeyResult
+                    .setKeyResultName(keyResultModel.getKeyResult() != null
+                            ? keyResultModel.getKeyResult()
+                            : null);
+            tblGoalKeyResult
+                    .setActualValue(keyResultModel.getActualValue() != null
+                            ? keyResultModel.getActualValue()
+                            : 0d);
+            tblGoalKeyResult
+                    .setTargetValue(keyResultModel.getTargetValue() != null
+                            ? keyResultModel.getTargetValue()
+                            : 0d);
+
+            final TblUnitOfMeasure tblUnitOfMeasure = new TblUnitOfMeasure();
+
+            if (keyResultModel.getUnitOfMeasurementId() != null
+                    && keyResultModel.getUnitOfMeasurementId() != -1L) {
+
+                tblUnitOfMeasure.setId(keyResultModel.getUnitOfMeasurementId());
+                tblGoalKeyResult.setTblUnitOfMeasure(tblUnitOfMeasure);
+            } else {
+
+                tblGoalKeyResult.setTblUnitOfMeasure(null);
+            }
+
+            getFacadeLookup().getPersistenceFacade().update(tblGoalKeyResult);
+
+        }
+
+        apiResponse.setStatus(true);
+        apiResponse.setMessage("success");
+        apiResponse.setData(null);
+        return apiResponse;
+
+    }
+
+    @Override
+    public ApiResponseModel<?> getObjectiveList(CirightOKRObjectiveModel model)
+            throws CirightException {
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId().longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null
+                || model.getVerticalId().longValue() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        if (model.getAppId() == null || model.getAppId().longValue() == -1) {
+            throw new InvalidParameterException("App Id is not available",
+                    "appId");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "loginEmployeeId");
+        }
+
+        final ApiResponseModel<List<CirightOKRObjectiveModel>> apiResponse = new ApiResponseModel<>();
+
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put(UtilsQueryParameterConstants.SUBSCRIPTION_ID,
+                model.getSubscriptionId());
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID,
+                model.getVerticalId());
+
+        String sqlQuery = "SELECT tg.GoalID AS col_0_0, tg.GoalName AS col_0_1, tg.GoalDescription AS col_0_2, tg.Manager AS col_0_3,"
+                + " CONCAT(emp_owner.FirstName, ' ', emp_owner.LastName) AS col_0_4, tg.TeamId AS col_0_5, tet.Team_Description AS col_0_6,"
+                + " tg.goal_status_id AS col_0_7, tgs.goal_status_name AS col_0_8, tg.start_date AS col_0_9, tg.CompletionDate AS col_0_10,"
+                + " tg.master_goal_id AS col_0_11, master_obj.GoalName AS col_0_12, tgkr.goal_key_result_id AS col_0_13,"
+                + " tgkr.key_result_name AS col_0_14, tgkr.actual_value AS col_0_15, tgkr.target_value AS col_0_16,"
+                + " tgkr.unit_of_measure_id AS col_0_17, tuom.description AS col_0_18, tgkr.current_value AS col_0_19"
+                + " FROM tbl_goals tg"
+                + " INNER JOIN tbl_employee te ON te.EmployeeID = tg.created_by"
+                + " LEFT JOIN tbl_employee emp_owner ON tg.Manager = emp_owner.EmployeeID AND emp_owner.Active_Employee = 1"
+                + " LEFT JOIN tbl_employee_team tet ON tg.TeamId = tet.TeamId AND tet.Team_Active = 1"
+                + " LEFT JOIN tbl_goal_status tgs ON tg.goal_status_id = tgs.goal_status_id AND tgs.status = 1"
+                + " LEFT JOIN tbl_goals master_obj ON tg.master_goal_id = master_obj.GoalID AND master_obj.IsActive = 1"
+                + " LEFT JOIN tbl_goal_key_results tgkr ON tg.GoalID = tgkr.goal_id AND tgkr.status = 1"
+                + " LEFT JOIN tbl_unit_of_measure tuom ON tgkr.unit_of_measure_id = tuom.unit_of_measure_id AND tuom.status = 1"
+                + " WHERE tg.IsActive = 1 AND te.CompanyID = :subscriptionId AND te.Vertical_Id = :verticalId ORDER BY tg.created_date DESC";
+
+        final List<Object[]> resultList = getFacadeLookup()
+                .getPersistenceFacade().findByNativeQueryC(sqlQuery,
+                        new QueryOptions(options), Object[].class);
+
+        Map<Long, CirightOKRObjectiveModel> objective = new LinkedHashMap<>();
+
+        if (resultList != null && !resultList.isEmpty()) {
+
+            for (final Object[] obj : resultList) {
+
+                Long objectiveId = obj[0] != null
+                        ? Long.valueOf(obj[0].toString())
+                        : -1L;
+
+                objective.computeIfAbsent(objectiveId, id -> {
+
+                    CirightOKRObjectiveModel objectiveModel = new CirightOKRObjectiveModel();
+
+                    objectiveModel.setObjectiveId(objectiveId);
+                    objectiveModel.setObjective(
+                            obj[1] != null ? obj[1].toString() : "");
+                    objectiveModel.setDescription(
+                            obj[2] != null ? obj[2].toString() : "");
+                    objectiveModel.setOwnerId(
+                            obj[3] != null ? Long.valueOf(obj[3].toString())
+                                    : -1);
+                    objectiveModel
+                            .setOwner(obj[4] != null ? obj[4].toString() : "");
+                    objectiveModel.setTeamId(
+                            obj[5] != null ? Long.valueOf(obj[5].toString())
+                                    : -1);
+                    objectiveModel
+                            .setTeam(obj[6] != null ? obj[6].toString() : "");
+                    objectiveModel.setStatusId(
+                            obj[7] != null ? Long.valueOf(obj[7].toString())
+                                    : -1);
+                    objectiveModel
+                            .setStatus(obj[8] != null ? obj[8].toString() : "");
+                    objectiveModel.setStartDate(
+                            obj[9] != null ? df.format(obj[9]) : "");
+                    objectiveModel.setEndDate(
+                            obj[10] != null ? df.format(obj[10]) : "");
+                    objectiveModel.setParentObjectiveId(
+                            obj[11] != null ? Long.valueOf(obj[11].toString())
+                                    : -1);
+                    objectiveModel.setParentObjective(
+                            obj[12] != null ? obj[12].toString() : "");
+                    objectiveModel.setKeyResults(new ArrayList<>());
+                    return objectiveModel;
+                });
+
+                CirightOKRObjectiveModel goalObjective = objective
+                        .get(objectiveId);
+
+                Long keyResultId = obj[13] != null
+                        ? Long.valueOf(obj[13].toString())
+                        : -1;
+
+                if (keyResultId != null && keyResultId != -1) {
+
+                    final CirightOKRKeyResultModel keyResultModel = new CirightOKRKeyResultModel();
+
+                    keyResultModel.setKeyResultId(keyResultId);
+                    keyResultModel.setKeyResult(
+                            obj[14] != null && !obj[14].toString().equals("")
+                                    ? obj[14].toString()
+                                    : "");
+                    keyResultModel.setActualValue(
+                            obj[15] != null ? Double.valueOf(obj[15].toString())
+                                    : null);
+                    keyResultModel.setTargetValue(
+                            obj[16] != null ? Double.valueOf(obj[16].toString())
+                                    : null);
+                    keyResultModel.setUnitOfMeasurementId(
+                            obj[17] != null ? Long.valueOf(obj[17].toString())
+                                    : -1);
+                    keyResultModel.setUnitOfMeasurement(
+                            obj[18] != null && !obj[18].toString().equals("")
+                                    ? obj[18].toString()
+                                    : "");
+                    keyResultModel.setCurrentValue(
+                            obj[19] != null ? Double.valueOf(obj[19].toString())
+                                    : null);
+                    goalObjective.getKeyResults().add(keyResultModel);
+                }
+            }
+        }
+        apiResponse.setStatus(true);
+        apiResponse.setMessage("success");
+        apiResponse.setData(new ArrayList<>(objective.values()));
+        return apiResponse;
+    }
+
+    @Override
+    public ApiResponseModel<?> updateObjectiveStatus(Long objectiveId)
+            throws CirightException, InvalidParameterException {
+
+        if (objectiveId == null || objectiveId.longValue() == -1) {
+            throw new InvalidParameterException("Objective Id is not available",
+                    "objectiveId");
+        }
+
+        final ApiResponseModel<?> response = new ApiResponseModel<>();
+        final Map<String, Object> options = new HashMap<>();
+
+        // remove child event
+        options.put(UtilsQueryParameterConstants.GOAL_ID, objectiveId);
+        options.put(UtilsQueryParameterConstants.NEW_STATUS,
+                UtilsConfigConstants.INACTIVE_STATUS);
+
+        getFacadeLookup().getPersistenceFacade().findByNamedExecuteQueryC(
+                "update.admin.goals.status", new QueryOptions(options));
+
+        /* Inactive Key Results Entry For Given Goal Id */
+
+        getFacadeLookup().getPersistenceFacade().findByNamedExecuteQueryC(
+                "update.goal.key.results.status.by.goal.id",
+                new QueryOptions(options));
+
+        response.setStatus(true);
+        response.setMessage("Success");
+        response.setData(null);
+        return response;
+
+    }
+
+    @Override
+    public ApiResponseModel<?> addOrUpdateObjectiveKeyResult(
+            CirightOKRKeyResultModel model)
+            throws InvalidParameterException, CirightException {
+
+        if (model.getKeyResult() == null || model.getKeyResult().equals("")) {
+            throw new InvalidParameterException("Key Result is not available",
+                    "keyResult");
+        }
+
+        if (model.getObjectiveId() == null
+                || model.getObjectiveId().longValue() == -1) {
+            throw new InvalidParameterException("Objective Id is not available",
+                    "objectiveId");
+        }
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId().longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null
+                || model.getVerticalId().longValue() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        if (model.getAppId() == null || model.getAppId().longValue() == -1) {
+            throw new InvalidParameterException("App Id is not available",
+                    "appId");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "loginEmployeeId");
+        }
+
+        final ApiResponseModel<?> apiResponse = new ApiResponseModel<>();
+
+        final TblEmployee tblEmployeeCreatedBy = new TblEmployee();
+        tblEmployeeCreatedBy.setId(model.getLoginEmployeeId());
+
+        final TblGoalKeyResult tblGoalKeyResult = new TblGoalKeyResult();
+
+        if (model.getKeyResultId() != null
+                && model.getKeyResultId().longValue() != -1) {
+
+            tblGoalKeyResult.setId(model.getKeyResultId());
+            getFacadeLookup().getPersistenceFacade().load(tblGoalKeyResult);
+
+            tblGoalKeyResult.setUpdatedDate(new Date());
+            tblGoalKeyResult.setTblEmployeeByUpdatedBy(tblEmployeeCreatedBy);
+        } else {
+
+            tblGoalKeyResult.setCreatedDate(new Date());
+            tblGoalKeyResult.setTblEmployeeByCreatedBy(tblEmployeeCreatedBy);
+            tblGoalKeyResult.setStatus(UtilsConfigConstants.ACTIVE_STATUS);
+        }
+
+        final TblGoals tblGoalObjective = new TblGoals();
+        tblGoalObjective.setId(model.getObjectiveId());
+        tblGoalKeyResult.setTblGoals(tblGoalObjective);
+
+        tblGoalKeyResult.setKeyResultName(model.getKeyResult());
+        tblGoalKeyResult.setCurrentValue(
+                model.getCurrentValue() != null ? model.getCurrentValue() : 0d);
+        tblGoalKeyResult.setTargetValue(
+                model.getTargetValue() != null ? model.getTargetValue() : 0d);
+
+        final TblUnitOfMeasure tblUnitOfMeasure = new TblUnitOfMeasure();
+
+        if (model.getUnitOfMeasurementId() != null
+                && model.getUnitOfMeasurementId() != -1L) {
+
+            tblUnitOfMeasure.setId(model.getUnitOfMeasurementId());
+            tblGoalKeyResult.setTblUnitOfMeasure(tblUnitOfMeasure);
+        } else {
+
+            tblGoalKeyResult.setTblUnitOfMeasure(null);
+        }
+
+        getFacadeLookup().getPersistenceFacade().update(tblGoalKeyResult);
+
+        apiResponse.setStatus(true);
+        apiResponse.setMessage("success");
+        apiResponse.setData(null);
+        return apiResponse;
+
+    }
+
+    @Override
+    public ApiResponseModel<?> deleteKeyResultStatus(Long keyResultId)
+            throws CirightException, InvalidParameterException {
+
+        if (keyResultId == null || keyResultId.longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Key Result Id is not available", "keyResultId");
+        }
+
+        final ApiResponseModel<?> response = new ApiResponseModel<>();
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put("keyResultId", keyResultId);
+        options.put(UtilsQueryParameterConstants.NEW_STATUS,
+                UtilsConfigConstants.INACTIVE_STATUS);
+
+        getFacadeLookup().getPersistenceFacade().findByNamedExecuteQueryC(
+                "update.goal.key.results.status.by.id",
+                new QueryOptions(options));
+
+        response.setStatus(true);
+        response.setMessage("Success");
+        response.setData(null);
+        return response;
+
+    }
+
+    @Override
+    public ApiResponseModel<?> addNewTeam(CirightOKRTeamModel model)
+            throws InvalidParameterException, CirightException {
+
+        if (model.getTeam() == null || model.getTeam().equals("")) {
+            throw new InvalidParameterException("Team is not available",
+                    "team");
+        }
+
+        if (model.getTeamLeadId() == null
+                || model.getTeamLeadId().longValue() == -1) {
+            throw new InvalidParameterException("Team Lead Id is not available",
+                    "teamLeadId");
+        }
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId().longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null
+                || model.getVerticalId().longValue() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        if (model.getAppId() == null || model.getAppId().longValue() == -1) {
+            throw new InvalidParameterException("App Id is not available",
+                    "appId");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "loginEmployeeId");
+        }
+
+        final ApiResponseModel<?> apiResponse = new ApiResponseModel<>();
+
+        final TblEmployee tblEmployeeCreatedBy = new TblEmployee();
+        tblEmployeeCreatedBy.setId(model.getLoginEmployeeId());
+
+        final TblEmployeeTeam tblEmployeeTeam = new TblEmployeeTeam();
+
+        tblEmployeeTeam.setCreatedDate(new Date());
+        tblEmployeeTeam.setTblEmployeeByCreatedBy(tblEmployeeCreatedBy);
+        tblEmployeeTeam.setTeamActive(UtilsConfigConstants.ACTIVE_STATUS);
+
+        final TblEmployee tblEmployeeTeamLead = new TblEmployee();
+        tblEmployeeTeamLead.setId(model.getTeamLeadId());
+        tblEmployeeTeam.setTblTeamLead(tblEmployeeTeamLead);
+
+        tblEmployeeTeam.setTeamDescription(model.getTeam());
+        tblEmployeeTeam.setDescription(
+                model.getTeamDescription() != null ? model.getTeamDescription()
+                        : null);
+
+        getFacadeLookup().getPersistenceFacade().update(tblEmployeeTeam);
+
+        apiResponse.setStatus(true);
+        apiResponse.setMessage("success");
+        apiResponse.setData(null);
+        return apiResponse;
+
+    }
+
+    @Override
+    public ApiResponseModel<?> addOrUpdateTeamMember(
+            CirightOKRTeamMemberModel model) throws InvalidParameterException,
+            CirightException, FieldAlreadyExistException {
+
+        if (model.getEmployeeId() == null
+                || model.getEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "employeeId");
+        }
+
+        if (model.getTeamId() == null || model.getTeamId().longValue() == -1) {
+            throw new InvalidParameterException("Team Id is not available",
+                    "teamId");
+        }
+
+        if (model.getRole() == null || model.getRole().equals("")) {
+            throw new InvalidParameterException("Role is not available",
+                    "role");
+        }
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId().longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null
+                || model.getVerticalId().longValue() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        if (model.getAppId() == null || model.getAppId().longValue() == -1) {
+            throw new InvalidParameterException("App Id is not available",
+                    "appId");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "loginEmployeeId");
+        }
+
+        final ApiResponseModel<?> apiResponse = new ApiResponseModel<>();
+
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put(UtilsQueryParameterConstants.TEAM_ID, model.getTeamId());
+        options.put(UtilsQueryParameterConstants.EMPLOYEE_ID,
+                model.getEmployeeId());
+        options.put("roleId", model.getRole());
+
+        final List<Long> resultList = getFacadeLookup().getPersistenceFacade()
+                .findByNamedQueryC(
+                        "get.active.team.id.by.team.employee.id.and.role",
+                        new QueryOptions(options));
+
+        if (!resultList.isEmpty() && resultList.get(0) != null) {
+
+            throw new FieldAlreadyExistException(
+                    "Employee is Already Exist For This Team & Role");
+        }
+
+        final TblEmployee tblEmployeeCreatedBy = new TblEmployee();
+        tblEmployeeCreatedBy.setId(model.getLoginEmployeeId());
+
+        final TblEmployeeActiveTeam tblEmployeeActiveTeam = new TblEmployeeActiveTeam();
+
+        if (model.getActiveTeamMemberId() != null
+                && model.getActiveTeamMemberId().longValue() != -1) {
+
+            tblEmployeeActiveTeam.setId(model.getActiveTeamMemberId());
+            getFacadeLookup().getPersistenceFacade()
+                    .load(tblEmployeeActiveTeam);
+
+            tblEmployeeActiveTeam.setUpdatedDate(new Date());
+            tblEmployeeActiveTeam
+                    .setTblEmployeeByUpdateBy(tblEmployeeCreatedBy);
+        } else {
+
+            tblEmployeeActiveTeam.setCreatedDate(new Date());
+            tblEmployeeActiveTeam
+                    .setTblEmployeeByCreatedBy(tblEmployeeCreatedBy);
+            tblEmployeeActiveTeam.setStatus(UtilsConfigConstants.ACTIVE_STATUS);
+        }
+
+        final TblEmployee tblEmployee = new TblEmployee();
+        tblEmployee.setId(model.getEmployeeId());
+        tblEmployeeActiveTeam.setTblEmployee(tblEmployee);
+
+        final TblEmployeeTeam tblEmployeeTeam = new TblEmployeeTeam();
+        tblEmployeeTeam.setId(model.getTeamId());
+        tblEmployeeActiveTeam.setTblEmployeeTeam(tblEmployeeTeam);
+
+        tblEmployeeActiveTeam.setRole(model.getRole());
+
+        getFacadeLookup().getPersistenceFacade().update(tblEmployeeActiveTeam);
+
+        apiResponse.setStatus(true);
+        apiResponse.setMessage("success");
+        apiResponse.setData(null);
+        return apiResponse;
+
+    }
+
+    @Override
+    public ApiResponseModel<?> getTeamMemberList(
+            CirightOKRTeamMemberModel model) throws CirightException {
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId().longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null
+                || model.getVerticalId().longValue() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        if (model.getAppId() == null || model.getAppId().longValue() == -1) {
+            throw new InvalidParameterException("App Id is not available",
+                    "appId");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "loginEmployeeId");
+        }
+
+        final ApiResponseModel<List<CirightOKRTeamMemberModel>> apiResponse = new ApiResponseModel<>();
+
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put(UtilsQueryParameterConstants.SUBSCRIPTION_ID,
+                model.getSubscriptionId());
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID,
+                model.getVerticalId());
+
+        if (model.getIsLead() != null) {
+            options.put("isLead", model.getIsLead());
+        }
+
+        String sqlQuery = "SELECT teat.active_team_id AS col_0_0, GROUP_CONCAT(teat.team_id SEPARATOR ', ') AS col_0_1,"
+                + " GROUP_CONCAT(tet.Team_Description SEPARATOR ', ') AS col_0_2, teat.employee_id AS col_0_3,"
+                + " CONCAT(te_emp.FirstName, ' ', te_emp.LastName) AS col_0_4, teat.`role` AS col_0_5,"
+                + " IF(teat.status = 1, 'Active', 'Inactive') AS col_0_6,"
+                + " MAX(CASE WHEN tet.team_lead = teat.employee_id THEN 1 ELSE 0 END) AS is_team_lead,"
+                + " COUNT(DISTINCT CASE WHEN tg.Manager = teat.employee_id THEN tg.GoalID END) AS total_goals_owned"
+                + " FROM tbl_employee_active_team teat"
+                + " INNER JOIN tbl_employee te ON te.EmployeeID = teat.created_by"
+                + " INNER JOIN tbl_employee_team tet ON tet.TeamId = teat.team_id AND tet.Team_Active = 1"
+                + " INNER JOIN tbl_employee te_emp ON te_emp.EmployeeID = teat.employee_id AND te_emp.Active_Employee = 1"
+                + " LEFT JOIN tbl_goals tg ON tet.TeamId = tg.TeamId AND tg.IsActive = 1 AND tg.Manager = teat.employee_id"
+                + " WHERE te.CompanyID = :subscriptionId AND te.Vertical_Id = :verticalId"
+                + " GROUP BY teat.employee_id, teat.`role`, CONCAT(te_emp.FirstName, ' ', te_emp.LastName), teat.status"
+                + (model.getIsLead() != null && Short.valueOf(
+                        model.getIsLead()) == UtilsConfigConstants.ACTIVE_STATUS
+                                ? " HAVING is_team_lead = 1 "
+                                : "")
+                + (model.getIsLead() != null && Short.valueOf(model
+                        .getIsLead()) == UtilsConfigConstants.INACTIVE_STATUS
+                                ? " HAVING is_team_lead = 0 "
+                                : "")
+                + " ORDER BY MAX(teat.created_date) DESC";
+
+        final List<Object[]> resultList = getFacadeLookup()
+                .getPersistenceFacade().findByNativeQueryC(sqlQuery,
+                        new QueryOptions(options), Object[].class);
+
+        List<CirightOKRTeamMemberModel> responseModel = new ArrayList<>();
+
+        if (resultList != null && !resultList.isEmpty()) {
+
+            for (final Object[] obj : resultList) {
+
+                CirightOKRTeamMemberModel teamMemberModel = new CirightOKRTeamMemberModel();
+
+                teamMemberModel.setActiveTeamMemberId(
+                        obj[0] != null ? Long.valueOf(obj[0].toString()) : -1L);
+                teamMemberModel.setTeamIds(
+                        obj[1] != null && !obj[1].toString().isEmpty()
+                                ? Arrays.stream(obj[1].toString().split(","))
+                                        .map(String::trim).map(Long::valueOf)
+                                        .toArray(Long[]::new)
+                                : new Long[0]);
+
+                teamMemberModel.setTeams(
+                        obj[2] != null && !obj[2].toString().isEmpty() ? Arrays
+                                .stream(obj[2].toString().split(","))
+                                .map(String::trim).toArray(String[]::new)
+                                : new String[0]);
+                teamMemberModel.setEmployeeId(
+                        obj[3] != null ? Long.valueOf(obj[3].toString()) : -1L);
+                teamMemberModel.setEmployeeName(
+                        obj[4] != null ? obj[4].toString() : "");
+                teamMemberModel
+                        .setRole(obj[5] != null ? obj[5].toString() : "");
+                teamMemberModel
+                        .setStatus(obj[6] != null ? obj[6].toString() : "");
+                teamMemberModel.setIsLead(
+                        obj[7] != null ? Short.valueOf(obj[7].toString())
+                                : UtilsConfigConstants.INACTIVE_STATUS);
+                teamMemberModel.setObjectivesAssignedCount(
+                        obj[8] != null ? Integer.valueOf(obj[8].toString())
+                                : 0);
+
+                responseModel.add(teamMemberModel);
+
+            }
+        }
+        apiResponse.setStatus(true);
+        apiResponse.setMessage("success");
+        apiResponse.setData(responseModel);
+        return apiResponse;
+    }
+
+    @Override
+    public ApiResponseModel<?> updateMembersTeam(
+            CirightOKRTeamMemberModel model) throws InvalidParameterException,
+            CirightException, FieldAlreadyExistException {
+
+        if (model.getEmployeeId() == null
+                || model.getEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "employeeId");
+        }
+
+        if (model.getTeamIds() == null) {
+            throw new InvalidParameterException("Team Ids is not available",
+                    "teamIds");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Login Employee Id is not available",
+                    "loginEmployeeId");
+        }
+        
+        final ApiResponseModel<?> apiResponse = new ApiResponseModel<>();
+        final Map<String, Object> options = new HashMap<>();
+
+        List<Long> resultList = null;
+        Set<Long> currentIds = null;
+
+        if (model.getRole() != null && !model.getRole().equals("")) {
+
+            options.put(UtilsQueryParameterConstants.EMPLOYEE_ID,
+                    model.getEmployeeId());
+            options.put("role", model.getRole());
+
+            resultList = getFacadeLookup().getPersistenceFacade()
+                    .findByNamedQueryC(
+                            "get.active.team.id.by.employee.id.and.role",
+                            new QueryOptions(options));
+
+            currentIds = new HashSet<>(resultList);
+
+        } else {
+
+            options.clear();
+            options.put(UtilsQueryParameterConstants.EMPLOYEE_ID,
+                    model.getEmployeeId());
+
+            resultList = getFacadeLookup().getPersistenceFacade()
+                    .findByNamedQueryC("get.active.team.id.by.employee.id",
+                            new QueryOptions(options));
+
+            currentIds = new HashSet<>(resultList);
+
+        }
+
+        Set<Long> incomingIds = new HashSet<>(
+                Arrays.asList(model.getTeamIds()));
+
+        /* ------- To Add Entry */
+
+        Set<Long> toAdd = new HashSet<>(incomingIds);
+        toAdd.removeAll(currentIds);
+
+        if (!toAdd.isEmpty()) {
+
+            final TblEmployeeActiveTeam tblEmployeeActiveTeam = new TblEmployeeActiveTeam();
+
+            tblEmployeeActiveTeam.setCreatedDate(new Date());
+
+            final TblEmployee tblEmployeeCreatedBy = new TblEmployee();
+            tblEmployeeCreatedBy.setId(model.getLoginEmployeeId());
+            tblEmployeeActiveTeam
+                    .setTblEmployeeByCreatedBy(tblEmployeeCreatedBy);
+
+            tblEmployeeActiveTeam.setStatus(UtilsConfigConstants.ACTIVE_STATUS);
+
+            final TblEmployee tblEmployee = new TblEmployee();
+            tblEmployee.setId(model.getEmployeeId());
+            tblEmployeeActiveTeam.setTblEmployee(tblEmployee);
+
+            if (model.getNewRole() != null && !model.getNewRole().equals("")) {
+                tblEmployeeActiveTeam.setRole(model.getNewRole());
+            }
+
+            for (Long teamId : toAdd) {
+
+                final TblEmployeeTeam tblEmployeeTeam = new TblEmployeeTeam();
+                tblEmployeeTeam.setId(teamId);
+                tblEmployeeActiveTeam.setTblEmployeeTeam(tblEmployeeTeam);
+
+                getFacadeLookup().getPersistenceFacade()
+                        .update(tblEmployeeActiveTeam);
+
+            }
+        }
+
+        /* ------- To Update Entries */
+
+        Set<Long> toRemove = new HashSet<>(currentIds);
+        toRemove.removeAll(incomingIds);
+
+        if (!toRemove.isEmpty()) {
+
+            options.clear();
+            options.put("activeTeamMemberIds", toRemove);
+            options.put(UtilsQueryParameterConstants.NEW_STATUS,
+                    UtilsConfigConstants.INACTIVE_STATUS);
+
+            getFacadeLookup().getPersistenceFacade().findByNamedExecuteQueryC(
+                    "update.team.member.status.by.id",
+                    new QueryOptions(options));
+        }
+
+        apiResponse.setStatus(true);
+        apiResponse.setMessage("success");
+        apiResponse.setData(null);
+        return apiResponse;
+
+    }
+
+    @Override
+    public ApiResponseModel<?> deleteMembersTeam(
+            CirightOKRTeamMemberModel model)
+            throws InvalidParameterException, CirightException {
+
+        if (model.getEmployeeId() == null
+                || model.getEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "employeeId");
+        }
+
+        if (model.getTeamIds() == null) {
+            throw new InvalidParameterException("Team Ids is not available",
+                    "teamIds");
+        }
+
+        final ApiResponseModel<?> apiResponse = new ApiResponseModel<>();
+
+        final Map<String, Object> options = new HashMap<>();
+
+        List<Long> teamIdList = Arrays.asList(model.getTeamIds());
+        
+        options.put(UtilsQueryParameterConstants.EMPLOYEE_ID,
+                model.getEmployeeId());
+        options.put(UtilsQueryParameterConstants.TEAM_IDS, teamIdList);
+        options.put(UtilsQueryParameterConstants.NEW_STATUS,
+                UtilsConfigConstants.INACTIVE_STATUS);
+
+        if (model.getRole() != null && !model.getRole().equals("")) {
+            options.put("role", model.getRole());
+        }
+
+        final String sqlQuery = " UPDATE tbl_employee_active_team teat"
+                + " SET teat.status = :newStatus"
+                + " WHERE teat.employee_id = :employeeId AND teat.team_id IN (:teamIds)"
+                + (model.getRole() != null && !model.getRole().equals("")
+                        ? " AND teat.role = :role"
+                        : "")
+                + " AND teat.status = 1";
+
+        getFacadeLookup().getPersistenceFacade()
+                .findByNativeExecuteQueryC(sqlQuery, new QueryOptions(options));
+
+        apiResponse.setStatus(true);
+        apiResponse.setMessage("success");
+        apiResponse.setData(null);
+        return apiResponse;
+
+    }
+
+}
+
+
+
+package com.tristatehvac.ciright.api.controller;
+
+import javax.servlet.ServletContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.tristatehvac.ciright.api.model.ApiResponseModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRCommonModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRKeyResultModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRObjectiveModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRTeamMemberModel;
+import com.tristatehvac.ciright.api.model.CirightOKR.CirightOKRTeamModel;
+import com.tristatehvac.ciright.api.service.CirightOKRService;
+import com.tristatehvac.ciright.restful.exception.FieldAlreadyExistException;
+import com.tristatehvac.ciright.restful.exception.InvalidParameterException;
+import com.tristatehvac.ciright.service.CommonService;
+
+@RestController
+@RequestMapping(value = "/cirightokr", produces = "application/json")
+public class CirightOKRController {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(CirightAgentController.class);
+
+    @Autowired
+    CirightOKRService cirightOKRService;
+
+    @Autowired
+    private CommonService commonService;
+
+    public CommonService getCommonService() {
+        return commonService;
+    }
+
+    public void setCommonService(CommonService commonService) {
+        this.commonService = commonService;
+    }
+
+    @Autowired
+    ServletContext context;
+
+    @RequestMapping(value = "/m3384762", method = RequestMethod.POST)
+    public ResponseEntity<?> getGoalComboList(
+            @RequestBody CirightOKRCommonModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.getGoalComboList(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<Object>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (response == null) {
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("No Content");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<ApiResponseModel<?>>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3384761", method = RequestMethod.POST)
+    public ResponseEntity<?> getGoalStatusComboList(
+            @RequestBody CirightOKRCommonModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.getGoalStatusComboList(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<Object>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (response == null) {
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("No Content");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<ApiResponseModel<?>>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3384765", method = RequestMethod.POST)
+    public ResponseEntity<?> getUnitOfMeasurementComboList(
+            @RequestBody CirightOKRCommonModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.getUnitOfMeasurementComboList(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<Object>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (response == null) {
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("No Content");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<ApiResponseModel<?>>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3384752", method = RequestMethod.POST)
+    public ResponseEntity<?> validateObjectiveOrderNo(
+            @RequestBody CirightOKRObjectiveModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.validateObjectiveOrderNo(model);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            LOGGER.error("Error: ", e);
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/m3384753", method = RequestMethod.POST)
+    public ResponseEntity<?> addOrUpdateObjective(
+            @RequestBody CirightOKRObjectiveModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.addOrUpdateObjective(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3384754", method = RequestMethod.POST)
+    public ResponseEntity<?> getObjectiveList(
+            @RequestBody CirightOKRObjectiveModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.getObjectiveList(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<Object>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (response == null) {
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("No Content");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<ApiResponseModel<?>>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3384755/{objectiveId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> updateObjectiveStatus(
+            @PathVariable(name = "objectiveId") Long objectiveId) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.updateObjectiveStatus(objectiveId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            LOGGER.error("Error: ", e);
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/m3384978", method = RequestMethod.POST)
+    public ResponseEntity<?> addOrUpdateObjectiveKeyResult(
+            @RequestBody CirightOKRKeyResultModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.addOrUpdateObjectiveKeyResult(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3393804/{keyResultId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteKeyResultStatus(
+            @PathVariable(name = "objectiveId") Long keyResultId) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.deleteKeyResultStatus(keyResultId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            LOGGER.error("Error: ", e);
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/m3393805", method = RequestMethod.POST)
+    public ResponseEntity<?> addNewTeam(
+            @RequestBody CirightOKRTeamModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.addNewTeam(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3394370", method = RequestMethod.POST)
+    public ResponseEntity<?> addOrUpdateTeamMember(
+            @RequestBody CirightOKRTeamMemberModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.addOrUpdateTeamMember(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final FieldAlreadyExistException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setMessage(e.getMessage());
+            response.setStatus(false);
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3394374", method = RequestMethod.POST)
+    public ResponseEntity<?> getTeamMemberList(
+            @RequestBody CirightOKRTeamMemberModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.getTeamMemberList(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<Object>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (response == null) {
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("No Content");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<ApiResponseModel<?>>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3394383", method = RequestMethod.POST)
+    public ResponseEntity<?> updateMembersTeam(
+            @RequestBody CirightOKRTeamMemberModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.updateMembersTeam(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final FieldAlreadyExistException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setMessage(e.getMessage());
+            response.setStatus(false);
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/m3394384", method = RequestMethod.POST)
+    public ResponseEntity<?> deleteMembersTeam(
+            @RequestBody CirightOKRTeamMemberModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.deleteMembersTeam(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+}package com.tristatehvac.ciright.api.model.CirightOKR;
+
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+public class CirightOKRCommonModel implements Serializable {
+
+    private Long subscriptionId;
+    private Long verticalId;
+    private Long appId;
+    private Long loginEmployeeId;
+
+    public Long getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(Long subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    }
+
+    public Long getVerticalId() {
+        return verticalId;
+    }
+
+    public void setVerticalId(Long verticalId) {
+        this.verticalId = verticalId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public Long getLoginEmployeeId() {
+        return loginEmployeeId;
+    }
+
+    public void setLoginEmployeeId(Long loginEmployeeId) {
+        this.loginEmployeeId = loginEmployeeId;
+    }
+
+}
+package com.tristatehvac.ciright.api.model.CirightOKR;
+
+import java.io.Serializable;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+public class CirightOKRObjectiveModel implements Serializable {
+
+    private Long subscriptionId;
+    private Long verticalId;
+    private Long appId;
+    private Long loginEmployeeId;
+    private Long objectiveId;
+    private String objective;
+    private String description;
+    private Long ownerId;
+    private String owner;
+    private Long teamId;
+    private String team;
+    private Long statusId;
+    private String status;
+    private String startDate;
+    private String endDate;
+    private Long parentObjectiveId;
+    private String parentObjective;
+    private Integer orderNo;
+    private List<CirightOKRKeyResultModel> keyResults;
+
+    public Long getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(Long subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    }
+
+    public Long getVerticalId() {
+        return verticalId;
+    }
+
+    public void setVerticalId(Long verticalId) {
+        this.verticalId = verticalId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public Long getLoginEmployeeId() {
+        return loginEmployeeId;
+    }
+
+    public void setLoginEmployeeId(Long loginEmployeeId) {
+        this.loginEmployeeId = loginEmployeeId;
+    }
+
+    public Long getObjectiveId() {
+        return objectiveId;
+    }
+
+    public void setObjectiveId(Long objectiveId) {
+        this.objectiveId = objectiveId;
+    }
+
+    public String getObjective() {
+        return objective;
+    }
+
+    public void setObjective(String objective) {
+        this.objective = objective;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
+    }
+
+    public String getTeam() {
+        return team;
+    }
+
+    public void setTeam(String team) {
+        this.team = team;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    public Long getParentObjectiveId() {
+        return parentObjectiveId;
+    }
+
+    public void setParentObjectiveId(Long parentObjectiveId) {
+        this.parentObjectiveId = parentObjectiveId;
+    }
+
+    public String getParentObjective() {
+        return parentObjective;
+    }
+
+    public void setParentObjective(String parentObjective) {
+        this.parentObjective = parentObjective;
+    }
+
+    public Integer getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(Integer orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    public List<CirightOKRKeyResultModel> getKeyResults() {
+        return keyResults;
+    }
+
+    public void setKeyResults(List<CirightOKRKeyResultModel> keyResults) {
+        this.keyResults = keyResults;
+    }
+
+}
+package com.tristatehvac.ciright.api.model;
+
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+public class MapModel extends ApiDataResponseModel implements Serializable {
+
+    private Long key;
+    private String value;
+    private Long primaryId;
+
+    public MapModel() {
+
+    }
+
+    public MapModel(Long key, String value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    public Long getKey() {
+        return key;
+    }
+
+    public void setKey(Long key) {
+        this.key = key;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public Long getPrimaryId() {
+        return primaryId;
+    }
+
+    public void setPrimaryId(Long primaryId) {
+        this.primaryId = primaryId;
+    }
+
+}
+package com.tristatehvac.ciright.command;
+
+import java.util.Date;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+import com.tristatehvac.ciright.persistence.BaseEntity;
+
+@Entity
+@NamedQueries({
+        @NamedQuery(name = "get.goal.info.by.goalId", query = "SELECT tg.id, tg.goalName, tg.goalDescription, tg.isActive FROM TblGoals tg WHERE tg.id > :goalId ORDER BY tg.id"),
+        @NamedQuery(name = "find.by.adminGoalID.name", query = "FROM TblGoals tg LEFT JOIN tg.tblEmployeeByCreatedBy.tblVerticalSolutions vertical LEFT JOIN tg.tblEmployeeByCreatedBy.tblCustomer subscription WHERE lower(tg.goalName) = lower(:goalNameString) AND tg.id <> :goalId AND subscription.id = :custId AND vertical.id = :verticalId"),
+        @NamedQuery(name = "find.by.adminGoalOrder", query = "SELECT tg.goalName FROM TblGoals tg WHERE tg.tblYears.id = :goalYear AND tg.orderNumber = :goalOrder"),
+        @NamedQuery(name = "find.by.adminGoalOrder.on.edit", query = "SELECT tg.goalName FROM TblGoals tg WHERE tg.tblYears.id = :goalYear AND tg.orderNumber = :goalOrder AND tg.id != :goalId"),
+        @NamedQuery(name = "find.by.adminGoalName", query = "FROM TblGoals tg LEFT JOIN tg.tblEmployeeByCreatedBy.tblVerticalSolutions vertical LEFT JOIN tg.tblEmployeeByCreatedBy.tblCustomer subscription WHERE lower(tg.goalName) = lower(:goalNameString) AND subscription.id = :custId AND vertical.id = :verticalId"),
+        @NamedQuery(name = "admin.goal.getGoalById", query = "Select tg.id, tg.goalName, tg.goalDescription, tel.id, tes.id, tem.id, tg.isActive, tg.goalValue, uom.id, tg.completionDate, ty.id, tg.orderNumber, depat.id, team.id, tg.isGoalAchieved, tg.achievedDate, tg.isFinancialIncentive, tg.tblSphere.id, tg.leadOrderNo FROM TblGoals tg LEFT JOIN tg.tblEmployeeByLead tel LEFT JOIN tg.tblUnitOfMeasure uom LEFT JOIN tg.tblEmployeeBySupport tes LEFT JOIN tg.tblEmployeeByManager tem LEFT JOIN tg.tblYears ty LEFT JOIN tg.tblDepartment depat LEFT JOIN tg.tblTeam team WHERE tg.id =:goalId"),
+        @NamedQuery(name = "get.active.goal.list", query = "SELECT t.id, t.goalName FROM TblGoals t WHERE t.isActive = 1 AND t.tblEmployeeByCreatedBy.tblCustomer.id = :custId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId ORDER BY t.goalName ASC"),
+        @NamedQuery(name = "validate.goal.lead.order.no.by.id.on.add", query = "SELECT t.id FROM TblGoals t WHERE t.tblEmployeeByCreatedBy.tblCustomer.id = :custId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId AND t.tblEmployeeByLead.id = :goalLeadId AND t.leadOrderNo = :leadOrderNo"),
+        @NamedQuery(name = "validate.goal.lead.order.no.by.id.on.edit", query = "SELECT t.id FROM TblGoals t WHERE t.tblEmployeeByCreatedBy.tblCustomer.id = :custId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId AND t.tblEmployeeByLead.id = :goalLeadId AND t.leadOrderNo = :leadOrderNo AND t.id != :goalId"),
+        @NamedQuery(name = "get.active.goal.list.by.employee", query = "SELECT t.id, t.goalName FROM TblGoals t WHERE t.isActive = 1 AND t.tblEmployeeByCreatedBy.tblCustomer.id = :custId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId AND (t.tblEmployeeByLead.id=:employeeId OR t.tblEmployeeBySupport.id=:employeeId OR t.tblEmployeeByManager.id=:employeeId) ORDER BY t.goalName ASC"),
+        @NamedQuery(name = "get.goal.value.fro.employee", query = "SELECT t.goalValue,t.id,t.tblYears.id,t.goalName FROM TblGoals t WHERE t.isActive = 1 AND t.tblEmployeeByCreatedBy.tblCustomer.id = :custId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId  AND t.tblYears.id = :yearId AND t.tblEmployeeByLead.id = :employeeId"),
+        @NamedQuery(name = "get.goal.value.fro.employee.by.current.year", query = "SELECT t.goalValue,t.id,ty.id,t.goalName FROM TblGoals t LEFT JOIN t.tblYears ty WHERE t.isActive = 1 AND t.tblEmployeeByCreatedBy.tblCustomer.id = :custId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId  AND ty.yearDesc = :yearId AND t.tblEmployeeByLead.id = :employeeId"),
+        @NamedQuery(name = "get.cust.vettical.info.by.goal.id", query = "SELECT cr.tblCustomer.id,cr.tblVerticalSolutions.id FROM TblGoals e LEFT JOIN e.tblEmployeeByCreatedBy cr WHERE e.id =:goalId"),
+        @NamedQuery(name = "update.admin.goals.status", query = "UPDATE TblGoals t SET t.isActive = :newStatus WHERE t.id = :goalId"),
+        @NamedQuery(name = "get.admin.goal.data.by.id", query = "SELECT t.id, t.goalName FROM TblGoals t WHERE t.isActive = 1 AND t.tblYears.id=:yearId AND t.tblEmployeeByCreatedBy.tblCustomer.id = :subscriptionId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId ORDER BY t.orderNumber"),
+        @NamedQuery(name = "validate.goal.order.no.by.id.on.add", query = "SELECT t.id FROM TblGoals t WHERE t.tblEmployeeByCreatedBy.tblCustomer.id = :subscriptionId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId AND t.orderNumber = :orderNo"),
+        @NamedQuery(name = "validate.goal.order.no.by.id.on.edit", query = "SELECT t.id FROM TblGoals t WHERE t.tblEmployeeByCreatedBy.tblCustomer.id = :subscriptionId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId AND t.orderNumber = :orderNo AND t.id != :goalId"), })
+
+@Table(name = "tbl_goals")
+public class TblGoals extends BaseEntity implements java.io.Serializable {
+
+    public TblGoals() {
+        super();
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "GoalID")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "Manager")
+    private TblEmployee tblEmployeeByManager;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "`Lead`")
+    private TblEmployee tblEmployeeByLead;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "YearID")
+    private TblYears tblYears;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "updated_by")
+    private TblEmployee tblEmployeeByUpdatedBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "Support")
+    private TblEmployee tblEmployeeBySupport;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "created_by")
+    private TblEmployee tblEmployeeByCreatedBy;
+
+    @Column(name = "GoalName", length = 300)
+    private String goalName;
+
+    @Column(name = "GoalDescription", length = 65535)
+    private String goalDescription;
+
+    @Column(name = "IsActive", nullable = false)
+    private Short isActive;
+
+    @Column(name = "GoalValue")
+    private Long goalValue;
+
+    @Column(name = "CompletionDate")
+    private Date completionDate;
+
+    @Column(name = "updated_date")
+    private Date updatedDate;
+
+    @Column(name = "created_date")
+    private Date createdDate;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "tblGoals")
+    private Set<TblAction> tblActions;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "tblGoals")
+    private Set<TblStrategyGoalsRelationship> tblStrategyGoalsRelationships;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "tblGoals")
+    private Set<TblProject> tblProjects;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "tblGoals")
+    private Set<TblGoalsStrategyRelationship> tblGoalsStrategyRelationships;
+
+    @Column(name = "order_number")
+    private Integer orderNumber;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "department_id")
+    private TblDepartment tblDepartment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "TeamId")
+    private TblEmployeeTeam tblTeam;
+
+    @Column(name = "is_goal_achieved")
+    private Short isGoalAchieved;
+
+    @Column(name = "achieved_date")
+    private Date achievedDate;
+
+    @Column(name = "is_financial_incentive")
+    private Short isFinancialIncentive;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "sphere_id")
+    private TblSphere tblSphere;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "unit_of_measure_id")
+    private TblUnitOfMeasure tblUnitOfMeasure;
+
+    @Column(name = "lead_order_no")
+    private Integer leadOrderNo;
+
+    @Column(name = "start_date")
+    private Date startDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "goal_status_id")
+    private TblGoalStatus tblGoalStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "master_goal_id")
+    private TblGoals tblGoals;
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public void setTblActions(final Set<TblAction> tblActions) {
+        this.tblActions = tblActions;
+    }
+
+    public void setTblStrategyGoalsRelationships(
+            final Set<TblStrategyGoalsRelationship> tblStrategyGoalsRelationships) {
+        this.tblStrategyGoalsRelationships = tblStrategyGoalsRelationships;
+    }
+
+    public void setTblProjects(final Set<TblProject> tblProjects) {
+        this.tblProjects = tblProjects;
+    }
+
+    public void setTblGoalsStrategyRelationships(
+            final Set<TblGoalsStrategyRelationship> tblGoalsStrategyRelationships) {
+        this.tblGoalsStrategyRelationships = tblGoalsStrategyRelationships;
+    }
+
+    public TblEmployee getTblEmployeeByManager() {
+        return this.tblEmployeeByManager;
+    }
+
+    public void setTblEmployeeByManager(
+            final TblEmployee tblEmployeeByManager) {
+        this.tblEmployeeByManager = tblEmployeeByManager;
+    }
+
+    public TblEmployee getTblEmployeeByLead() {
+        return this.tblEmployeeByLead;
+    }
+
+    public void setTblEmployeeByLead(final TblEmployee tblEmployeeByLead) {
+        this.tblEmployeeByLead = tblEmployeeByLead;
+    }
+
+    public TblYears getTblYears() {
+        return this.tblYears;
+    }
+
+    public void setTblYears(final TblYears tblYears) {
+        this.tblYears = tblYears;
+    }
+
+    public TblEmployee getTblEmployeeByUpdatedBy() {
+        return this.tblEmployeeByUpdatedBy;
+    }
+
+    public void setTblEmployeeByUpdatedBy(
+            final TblEmployee tblEmployeeByUpdatedBy) {
+        this.tblEmployeeByUpdatedBy = tblEmployeeByUpdatedBy;
+    }
+
+    public TblEmployee getTblEmployeeBySupport() {
+        return this.tblEmployeeBySupport;
+    }
+
+    public void setTblEmployeeBySupport(
+            final TblEmployee tblEmployeeBySupport) {
+        this.tblEmployeeBySupport = tblEmployeeBySupport;
+    }
+
+    public TblEmployee getTblEmployeeByCreatedBy() {
+        return this.tblEmployeeByCreatedBy;
+    }
+
+    public void setTblEmployeeByCreatedBy(
+            final TblEmployee tblEmployeeByCreatedBy) {
+        this.tblEmployeeByCreatedBy = tblEmployeeByCreatedBy;
+    }
+
+    public String getGoalName() {
+        return this.goalName;
+    }
+
+    public void setGoalName(final String goalName) {
+        this.goalName = goalName;
+    }
+
+    public String getGoalDescription() {
+        return this.goalDescription;
+    }
+
+    public void setGoalDescription(final String goalDescription) {
+        this.goalDescription = goalDescription;
+    }
+
+    public Short getIsActive() {
+        return this.isActive;
+    }
+
+    public void setIsActive(final Short isActive) {
+        this.isActive = isActive;
+    }
+
+    public Long getGoalValue() {
+        return this.goalValue;
+    }
+
+    public void setGoalValue(final Long goalValue) {
+        this.goalValue = goalValue;
+    }
+
+    public Date getCompletionDate() {
+        return this.completionDate;
+    }
+
+    public void setCompletionDate(final Date completionDate) {
+        this.completionDate = completionDate;
+    }
+
+    public Date getUpdatedDate() {
+        return this.updatedDate;
+    }
+
+    public void setUpdatedDate(final Date updatedDate) {
+        this.updatedDate = updatedDate;
+    }
+
+    public Date getCreatedDate() {
+        return this.createdDate;
+    }
+
+    public void setCreatedDate(final Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Integer getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(final Integer orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public TblDepartment getTblDepartment() {
+        return tblDepartment;
+    }
+
+    public void setTblDepartment(final TblDepartment tblDepartment) {
+        this.tblDepartment = tblDepartment;
+    }
+
+    public TblEmployeeTeam getTblTeam() {
+        return tblTeam;
+    }
+
+    public void setTblTeam(final TblEmployeeTeam tblTeam) {
+        this.tblTeam = tblTeam;
+    }
+
+    public Short getIsGoalAchieved() {
+        return isGoalAchieved;
+    }
+
+    public void setIsGoalAchieved(final Short isGoalAchieved) {
+        this.isGoalAchieved = isGoalAchieved;
+    }
+
+    public Date getAchievedDate() {
+        return achievedDate;
+    }
+
+    public void setAchievedDate(final Date achievedDate) {
+        this.achievedDate = achievedDate;
+    }
+
+    public Short getIsFinancialIncentive() {
+        return isFinancialIncentive;
+    }
+
+    public void setIsFinancialIncentive(final Short isFinancialIncentive) {
+        this.isFinancialIncentive = isFinancialIncentive;
+    }
+
+    public TblSphere getTblSphere() {
+        return tblSphere;
+    }
+
+    public void setTblSphere(final TblSphere tblSphere) {
+        this.tblSphere = tblSphere;
+    }
+
+    public TblUnitOfMeasure getTblUnitOfMeasure() {
+        return tblUnitOfMeasure;
+    }
+
+    public void setTblUnitOfMeasure(final TblUnitOfMeasure tblUnitOfMeasure) {
+        this.tblUnitOfMeasure = tblUnitOfMeasure;
+    }
+
+    public Integer getLeadOrderNo() {
+        return leadOrderNo;
+    }
+
+    public void setLeadOrderNo(final Integer leadOrderNo) {
+        this.leadOrderNo = leadOrderNo;
+    }
+
+    public TblGoalStatus getTblGoalStatus() {
+        return tblGoalStatus;
+    }
+
+    public void setTblGoalStatus(TblGoalStatus tblGoalStatus) {
+        this.tblGoalStatus = tblGoalStatus;
+    }
+
+    public TblGoals getTblGoals() {
+        return tblGoals;
+    }
+
+    public void setTblGoals(TblGoals tblGoals) {
+        this.tblGoals = tblGoals;
+    }
+
+    public Set<TblAction> getTblActions() {
+        return tblActions;
+    }
+
+    public Set<TblStrategyGoalsRelationship> getTblStrategyGoalsRelationships() {
+        return tblStrategyGoalsRelationships;
+    }
+
+    public Set<TblProject> getTblProjects() {
+        return tblProjects;
+    }
+
+    public Set<TblGoalsStrategyRelationship> getTblGoalsStrategyRelationships() {
+        return tblGoalsStrategyRelationships;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+}

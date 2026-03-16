@@ -1,0 +1,1082 @@
+ParentBusinessTypes
+Parent Business Types
+
+admin-config-parent-business-types
+
+
+ else if (request.getRequestURI()
+                    .contains("admin-config-parent-business-types")) {
+                String businessTypeIdStr = request.getParameter("businessTypeId");
+
+                Long businessTypeId = null;
+                if (businessTypeIdStr != null 
+                        && !businessTypeIdStr.isEmpty() 
+                        && !"-1".equals(businessTypeIdStr)) {
+
+                    businessTypeId = Long.parseLong(businessTypeIdStr);
+                }
+                mv.addObject(
+                        "gridData",
+                        getCloudConfiguratorService()
+                            .getParentBusinessTypesByBusinessType(
+                                businessTypeId,
+                                UtilFacadeImpl.getCustomerIdFromSession(),
+                                UtilFacadeImpl.getVerticalFromSession()
+                            )
+                    );
+                   mv.addObject(
+                        "parentBusinessTypesProjectList",
+                        getCloudConfiguratorService().getAdminParentBusinessTypeList(
+                            UtilFacadeImpl.getCustomerIdFromSession(),
+                            UtilFacadeImpl.getVerticalFromSession()
+                        )
+                    );
+                mv.setViewName("admin.parent.business.types");
+                return mv;
+            } 
+            
+<definition name="admin.parent.business.types"
+		template="/WEB-INF/jsp/admin/adminParentBusinessTypes.jsp" />			
+			
+			
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+<div class="row">
+	<input type="hidden" id="hiddenRightForAdd" name="hiddenRightForAdd"
+		value="${addRights}" /> <input type="hidden"
+		id="hiddenRightForExport" name="hiddenRightForExport"
+		value="${exportRights}" />
+	<div class="col-md-12">
+		<div class="portlet box blue">
+			<div class="portlet-title">
+				<div class="caption">
+					<i class="fa fa-cogs"></i>Parent Business Types
+				</div>
+				<div class="actions">
+					<c:if test="${addRights == 1}">
+						<a href="javascript:displayAdminParentBusinessTypes()" class="btn green"><i
+							class="fa fa-plus"></i></a>
+					</c:if>
+				</div>
+			</div>
+			<div class="portlet-body">
+				<table class="table table-striped table-bordered table-hover"
+					id="tblAdminParentBusinessTypes">
+					<thead>
+						<tr>
+							<th>Business Type</th>
+							<th>Parent Business</th>
+							<th>Order No</th>
+					        <th>A/I</th>
+							<th><c:choose>
+									<c:when test="${editRights eq 1}">
+										Edit
+									</c:when>
+									<c:otherwise>
+										View
+									</c:otherwise>
+								</c:choose></th> 
+						</tr>
+					</thead>
+					<tbody>
+						<c:forEach var="data" items="${gridData}" varStatus="status">
+							<tr id="tr<c:out value = "${data.id}"/>">
+							<td id="BusinessTypesName<c:out value = "${data.id}"/>"><c:out
+										value="${data.businessTypeName}"></c:out></td>
+								<td id="parentBusinessTypesName<c:out value = "${data.id}"/>"><c:out
+										value="${data.parentBusinessTypesName}"></c:out></td>
+								<td id="orderNo<c:out value = "${data.id}"/>"><c:out
+										value="${data.orderNo}"></c:out></td>
+								<td><c:choose>
+										<c:when test="${editRights eq 1}">
+											<a href="#"
+												onclick="updateStatusAdminParentBusinessTypes('<c:out value = "${data.id}"/>')">
+												<c:if test="${data.status == 1}">
+													<i class="fa fa-check"
+														id="status<c:out value = "${data.id}"/>"></i>
+												</c:if> <c:if test="${data.status == 0}">
+													<i class="fa fa-times"
+														id="status<c:out value = "${data.id}"/>"></i>
+												</c:if>
+											</a>
+										</c:when>
+										<c:otherwise>
+											<c:if test="${data.status == 1}">
+												<i class="fa fa-check"></i>
+											</c:if>
+											<c:if test="${data.status == 0}">
+												<i class="fa fa-times"></i>
+											</c:if>
+										</c:otherwise>
+									</c:choose></td>
+								<td><c:choose>
+										<c:when test="${editRights eq 1}">
+											<a href="#" class="btn btn-sm dark"
+												id="<c:out value = "${data.id}"/>"
+												onclick="editAdminParentBusinessTypes(<c:out value = "${data.id}"/>);"><i
+												class="fa fa-edit"></i></a>
+										</c:when>
+										<c:otherwise>
+											<a href="#" class="btn btn-sm dark"
+												id="<c:out value = "${data.id}"/>"><i class="fa fa-eye"></i></a>
+										</c:otherwise>
+									</c:choose></td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="divAdminParentBusinessTypesId" data-backdrop="static"
+	data-keyboard="false" role="basic" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true" onclick="clearAll()"></button>
+				<h4 class="modal-title">Add/Edit Parent Business Types</h4>
+			</div>
+			<div class="modal-body">
+				<form name="adminParentBusinessTypesForm" id="adminParentBusinessTypesForm"
+					class="form-horizontal">
+					<input type="hidden" id="hdnAdminParentBusinessTypesId"
+						name="hdnAdminParentBusinessTypesId" value="" /> <input type="hidden"
+						name="hdnActive" id="hdnActive" value="0" /> <input type="hidden"
+						id="hiddenRightForEdit" value="${editRights}" /> <input
+						type="hidden" id="hiddenRightForDelete" value="${deleteRights}" />
+					<div class="form-body ">
+						<div class="row">
+						<div class="col-md-6">
+								<div class="form-group">
+									<label class="control-label col-md-3">Business Type<span
+										class="required">*</span></label>
+									<div class="col-md-8">
+										<select id="cmbAdminParentBusinessTypesProjectId"
+											name="cmbAdminParentBusinessTypesProjectId" class="form-control">
+											<option value="-1">-Select-</option>
+											<c:forEach var="obj" items="${parentBusinessTypesProjectList}"
+												varStatus="status">
+												<option value="<c:out value = "${obj.key}"/>"><c:out
+														value="${obj.value}"></c:out></option>
+											</c:forEach>
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+									<label class="control-label col-md-4">Parent Business
+									</label>
+									<div class="col-md-7">
+										<select id="cmbParentBusinessTypes"
+											name="cmbParentBusinessTypes" class="form-control" >
+											<option value="-1">-Select-</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							</div>
+							<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label class="control-label col-md-3">Order No <span
+										class="required">*</span></label>
+									<div class="col-md-8">
+										<input type="text" name="txtOrderNo" id="txtOrderNo" value=""
+											maxlength="10" class="form-control" />
+									</div>
+								</div>
+							</div>
+					
+						<div class="col-md-6">
+								<div class="form-group">
+									<label class="control-label col-md-3">Active
+									</label>
+									<div class="col-md-9">
+										<div class="mt-checkbox-list"></div>
+										<label class="mt-checkbox mt-checkbox-outline col-md-2">
+											<input type="checkbox" name="chkAdminParentBusinessTypes"
+											id="chkAdminParentBusinessTypes" value="0" class="form-control" />
+											<span></span>
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<c:if test="${editRights == 1 && addRights == 1}">
+					<button type="button" class="btn blue"
+						onclick="saveAdminParentBusinessTypesData();return false;">Save</button>
+				</c:if>
+				<button type="button" onclick="clearAll()" class="btn default"
+					data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$(document)
+			.ready(
+					function() {
+						$('#tblAdminParentBusinessTypes').DataTable({
+							"language": {
+								"emptyTable": "No data available in table",
+								"info": "Showing _START_ to _END_ of _TOTAL_ entries",
+								"infoEmpty": "No entries found",
+								"lengthMenu": "_MENU_ entries",
+								"search": "Search:",
+								"zeroRecords": "No matching records found"
+							},
+							"lengthMenu": [[15, 50, 80, -1], [15, 50, 80, "All"]],
+							"pageLength": 15,
+
+							"columnDefs": [
+								{ "orderable": false, "targets": [4] }
+							],
+
+							"order": [[2, "desc"]]
+						});
+
+						$("#txtOrderNo").inputmask("integer");
+					});
+
+	function clearAll() {
+		resetForm('adminParentBusinessTypesForm');
+	}
+</script>
+
+
+ /**
+* START : Admin - Parent Business Types - Tab
+* ---------------------------------------------------------------- *
+*/
+
+function displayAdminParentBusinessTypes() {
+    resetForm('adminParentBusinessTypesForm');
+
+    document.getElementById('hdnAdminParentBusinessTypesId').value = '';
+    document.getElementById('cmbAdminParentBusinessTypesProjectId').value = '-1';
+
+   loadParentBusinessTypes();
+
+    document.getElementById("txtOrderNo").value = '';
+    document.getElementById("chkAdminParentBusinessTypes").checked = true;
+    document.getElementById("hdnActive").value = 1;
+
+    $('#divAdminParentBusinessTypesId').modal('show');
+}
+	
+function saveAdminParentBusinessTypesData() {
+
+    var content = getquerystring('adminParentBusinessTypesForm');
+
+    var adminParentBusinessTypesId =document.getElementById('hdnAdminParentBusinessTypesId').value;
+    var businessTypeId =
+        document.getElementById('cmbAdminParentBusinessTypesProjectId').value;
+
+    var parentBusinessId =
+        document.getElementById("cmbParentBusinessTypes").value;
+
+    var orderNo =
+        document.getElementById("txtOrderNo").value;
+
+    if (businessTypeId == "-1") {
+        toastr.error('Please Select Business Type');
+        return;
+    }
+
+    if (parentBusinessId == "-1") {
+        toastr.error('Please Select Parent Business');
+        return;
+    }
+
+	if (orderNo == null || orderNo == "") {
+		toastr.error('Please Enter Order No');
+		document.getElementById('txtOrderNo').focus();
+		return;
+	}	
+
+    if (document.getElementById("chkAdminParentBusinessTypes").checked == true) {
+		content.hdnActive = '1';
+	} else {
+		content.hdnActive = '0';
+	}
+
+    content.adminParentBusinessTypesId = adminParentBusinessTypesId;
+    content.cmbAdminParentBusinessTypesProjectId = businessTypeId;
+    content.parentBusinessTypesid = parentBusinessId;
+    content.orderNo = orderNo;
+    
+    content.businessTypeName =
+    $('#cmbAdminParentBusinessTypesProjectId option:selected').text();
+  content.parentBusinessTypesName =
+    $('#cmbParentBusinessTypes option:selected').text();
+    dwrAdminCommad.validateAdminParentBusinessTypesByOrder(
+        adminParentBusinessTypesId,
+        orderNo,
+        function (data) {
+
+            if (data === true) {
+                toastr.error("Order No Already Exist");
+                return;
+            }else {
+				dwrAdminCommad
+				.saveAdminParentBusinessTypesData(
+                content,
+                function (data) {
+	
+							if (adminParentBusinessTypesId == null
+										|| adminParentBusinessTypesId == '') {
+										addAdminParentBusinessTypesRow(
+											'tblAdminParentBusinessTypes',
+											content, data);
+										toastr
+											.success('Data Created Successfully');
+											} else {
+										editAdminParentBusinessTypesRow(
+											'tblAdminParentBusinessTypes',
+											content, data);
+										toastr
+											.success('Data Updated Successfully');
+									}
+                    $('#divAdminParentBusinessTypesId').modal('hide');
+           });
+           
+        }
+        });
+}
+function editAdminParentBusinessTypesRow(tabId, content, data) {
+	var hiddenEditRights = document.getElementById('hiddenRightForEdit').value;
+	var rowIndex = $('#' + tabId).dataTable().fnGetPosition(
+		$('#' + 'parentBusinessTypesName' + data).closest('tr')[0]);
+
+	var statusStr = '';
+	if (hiddenEditRights == 0) {
+		if (content.hdnActive == '1') {
+			statusStr = '<i class="fa fa-check" id="status' + data + '"></i>';
+		} else {
+			statusStr = '<i class="fa fa-times" id="status' + data + '"></i>';
+		}
+	} else {
+		if (content.hdnActive == '1') {
+			statusStr = '<a href="#"onclick="updateStatusAdminParentBusinessTypes(\''
+				+ data
+				+ '\')"><i class="fa fa-check" id="status'
+				+ data
+				+ '"></i></a>';
+		} else {
+			statusStr = '<a href="#"onclick="updateStatusAdminParentBusinessTypes(\''
+				+ data
+				+ '\')"><i class="fa fa-times" id="status'
+				+ data
+				+ '"></i></a>';
+		}
+	}
+
+	var editStr = '';
+	if (hiddenEditRights == 0) {
+		editStr = '<a href="#" class="btn btn-sm dark" onclick="editAdminParentBusinessTypes(\''
+			+ data + '\');"><i class="fa fa-eye"></i></a>';
+	} else {
+		editStr = '<a href="#" class="btn btn-sm dark" onclick="editAdminParentBusinessTypes(\''
+			+ data + '\');"><i class="fa fa-edit"></i></a>';
+	}
+
+	$('#' + tabId).dataTable()
+		.fnUpdate(
+			[escapeHtml(content.businessTypeName),escapeHtml(content.parentBusinessTypesName), content.orderNo, statusStr,
+				editStr], rowIndex);
+}
+
+function addAdminParentBusinessTypesRow(tabId, content, data) {
+
+	var hiddenEditRights = document.getElementById('hiddenRightForEdit').value;
+
+	var statusStr = '';
+	if (hiddenEditRights == 0) {
+		statusStr = (content.hdnActive == '1')
+			? '<i class="fa fa-check" id="status' + data + '"></i>'
+			: '<i class="fa fa-times" id="status' + data + '"></i>';
+	} else {
+		statusStr = (content.hdnActive == '1')
+			? '<a href="#" onclick="updateStatusAdminParentBusinessTypes(\'' + data + '\')"><i class="fa fa-check" id="status' + data + '"></i></a>'
+			: '<a href="#" onclick="updateStatusAdminParentBusinessTypes(\'' + data + '\')"><i class="fa fa-times" id="status' + data + '"></i></a>';
+	}
+
+	var editStr = (hiddenEditRights == 0)
+		? '<a href="#" class="btn btn-sm dark" onclick="editAdminParentBusinessTypes(\'' + data + '\');"><i class="fa fa-eye"></i></a>'
+		: '<a href="#" class="btn btn-sm dark" onclick="editAdminParentBusinessTypes(\'' + data + '\');"><i class="fa fa-edit"></i></a>';
+
+	var table = $('#' + tabId).DataTable();
+
+	var rowNode = table.row.add([
+		escapeHtml(content.businessTypeName),
+		escapeHtml(content.parentBusinessTypesName),
+		content.orderNo,
+		statusStr,
+		editStr
+	]).draw(false).node();
+
+	$(rowNode).prependTo(table.table().body());
+
+	$('td', rowNode)[0].setAttribute('id', 'businessTypeName' + data);
+	$('td', rowNode)[1].setAttribute('id', 'parentBusinessTypesName' + data);
+	$('td', rowNode)[2].setAttribute('id', 'orderNo' + data);
+}
+function updateStatusAdminParentBusinessTypes(sRowId) {
+	var status = $('#status' + sRowId).hasClass('fa fa-times') ? true : false;
+	var message = (status) ? "Activate" : "Deactivate";
+	dwrAdminCommad
+		.updateAdminParentBusinessTypesStatus(
+			sRowId,
+			status,
+			function(data) {
+				if (data != null && data == "success") {
+					var rowIndex = $('#tblAdminParentBusinessTypes')
+						.dataTable().fnGetPosition(
+							$('#' + 'parentBusinessTypesName' + sRowId).closest(
+								'tr')[0]);
+					var statusStr = '';
+					if (status) {
+						statusStr = '<a href="#"onclick="updateStatusAdminParentBusinessTypes(\''
+							+ sRowId
+							+ '\')"><i class="fa fa-check" id="status'
+							+ sRowId + '"></i></a>';
+					} else {
+						statusStr = '<a href="#"onclick="updateStatusAdminParentBusinessTypes(\''
+							+ sRowId
+							+ '\')"><i class="fa fa-times" id="status'
+							+ sRowId + '"></i></a>';
+					}
+					$('#tblAdminParentBusinessTypes').dataTable().fnUpdate(
+						statusStr, rowIndex, 3);
+					toastr.success("Data " + message + " Successfully");
+				} else {
+					toastr.error("Record not " + message);
+				}
+			});
+}
+
+function editAdminParentBusinessTypes(id) {
+	dwrAdminCommad
+		.getAdminParentBusinessTypesDataById(
+			id,
+			function(data) {
+				if (data != null) {
+					document.getElementById('hdnAdminParentBusinessTypesId').value = data.id;
+					$('#cmbAdminParentBusinessTypesProjectId').val(data.businessTypeid);
+					$('#cmbParentBusinessTypes').val(data.parentBusinessTypesid);
+					document.getElementById('txtOrderNo').value = data.orderNo;
+					
+
+					var status = data.status;
+					document.getElementById('hdnActive').value = data.status;
+					if (status == 1) {
+						document.getElementById("chkAdminParentBusinessTypes").checked = true;
+					}
+					if (status == 0) {
+						document.getElementById("chkAdminParentBusinessTypes").checked = false;
+					}
+
+					$('#divAdminParentBusinessTypesId').modal('show');
+				}
+			});
+}
+function loadParentBusinessTypes() {
+
+    dwrAdminCommad.getParentBusinessTypesForDropdown(
+        function (data) {
+
+            var html =
+                '<option value="-1">-Select-</option>';
+
+            for (var key in data) {
+                html += '<option value="' + key + '">' +
+                        data[key] + '</option>';
+            }
+            $('#cmbParentBusinessTypes').html(html);
+        }
+    );
+}
+$('#divAdminParentBusinessTypesId').on('shown.bs.modal', function () {
+    $(this).removeAttr('aria-hidden');
+});
+
+$('#divAdminParentBusinessTypesId').on('hidden.bs.modal', function () {
+    document.activeElement.blur();
+});
+$('#divAdminParentBusinessTypesId')
+    .on('shown.bs.modal', function () {
+        $(this).removeAttr('aria-hidden');
+        $('#cmbAdminParentBusinessTypesProjectId').focus();
+    })
+    .on('hidden.bs.modal', function () {
+        $(this).attr('aria-hidden', 'true');
+    });
+/**
+ * End : Admin - Parent Business Types - Tab
+ * ---------------------------------------------------------------- *
+ */
+
+ 
+ dwrAdminCommad
+ 
+ public boolean validateAdminParentBusinessTypesByOrder(
+            String adminParentBusinessTypesId,
+            String orderNo) throws CirightException {
+
+        Long id = null;
+        Integer ord = null;
+
+        if (adminParentBusinessTypesId != null && !adminParentBusinessTypesId.trim().isEmpty()) {
+            id = Long.valueOf(adminParentBusinessTypesId);
+        }
+
+        if (orderNo != null && !orderNo.trim().isEmpty()) {
+            ord = Integer.valueOf(orderNo);
+        }
+
+        return getCloudConfiguratorService().validateAdminParentBusinessTypesByOrder(
+                id,
+                ord,
+                UtilFacadeImpl.getCustomerIdFromSession(),
+                UtilFacadeImpl.getVerticalFromSession());
+    }
+
+    public String saveAdminParentBusinessTypesData(final Map<String, String> content)
+            throws CirightException {
+        return getCloudConfiguratorService().saveAdminParentBusinessTypesData(content,
+                UtilFacadeImpl.getEmployeeIdFromSession());
+    }
+
+    public String updateAdminParentBusinessTypesStatus(final Long adminParentBusinessTypesId,
+            final boolean status) throws CirightException {
+        return getCloudConfiguratorService()
+                .updateAdminParentBusinessTypesStatus(adminParentBusinessTypesId, status);
+    }
+
+    public AdminParentBusinessTypesModel getAdminParentBusinessTypesDataById(final Long adminParentBusinessTypesId)
+            throws CirightException {
+        return getCloudConfiguratorService()
+                .getAdminParentBusinessTypesDataById(adminParentBusinessTypesId);
+    }
+    
+    public Map<Long, String> getParentBusinessTypesForDropdown(
+            Long subscriptionId,
+            Long verticalId) throws CirightException {
+        return getCloudConfiguratorService()
+                .getParentBusinessTypesForDropdown(subscriptionId,verticalId);
+    }
+	
+	
+	service
+	public boolean validateAdminParentBusinessTypesByOrder(Long adminParentBusinessTypesId,
+            Integer orderNo, Long subscriptionId, Long verticalId)
+            throws CirightException;
+
+    public String saveAdminParentBusinessTypesData(Map<String, String> content,
+            Long employeeId) throws CirightException;
+
+    public String updateAdminParentBusinessTypesStatus(Long adminParentBusinessTypesId, boolean status)
+            throws CirightException;
+
+    public AdminParentBusinessTypesModel getAdminParentBusinessTypesDataById(Long adminParentBusinessTypesId)
+            throws CirightException;
+    
+    public List<AdminParentBusinessTypesModel>  getParentBusinessTypesByBusinessType(
+            Long businessTypeId,
+            Long subscriptionId,
+            Long verticalId) throws CirightException;
+    
+    public Map<Long, String> getParentBusinessTypesForDropdown(
+            Long subscriptionId,
+            Long verticalId) throws CirightException;
+			
+			
+			
+			
+serviceIMP
+			
+
+ @Override
+    public boolean validateAdminParentBusinessTypesByOrder(
+            Long adminParentBusinessTypesId,
+            Integer orderNo,
+            Long subscriptionId,
+            Long verticalId) throws CirightException {
+
+        final Map<String, Object> options = new HashMap<>();
+        boolean flag = false;
+        List<Object[]> resultList;
+
+        options.put(UtilsQueryParameterConstants.SUBSCRIPTION_ID, subscriptionId);
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID, verticalId);
+        options.put("orderNo", orderNo);
+
+        if (adminParentBusinessTypesId == null) {
+
+            resultList = getFacadeLookup().getPersistenceFacade()
+                    .findByNamedQueryC(
+                            "validate.admin.parent.business.types.order.no.by.id.on.add",
+                            new QueryOptions(options));
+
+        } else {
+
+            options.put("adminParentBusinessTypesId", adminParentBusinessTypesId);
+
+            resultList = getFacadeLookup().getPersistenceFacade()
+                    .findByNamedQueryC(
+                            "validate.admin.parent.business.types.order.no.by.id.on.edit",
+                            new QueryOptions(options));
+        }
+
+        if (resultList != null && !resultList.isEmpty()) {
+            flag = true;
+        }
+
+        return flag;
+    }
+    @Override
+    public String saveAdminParentBusinessTypesData(final Map<String, String> content,
+            Long employeeId) throws CirightException {
+
+
+        final TblParentBusinessTypes tblParentBusinessTypes = new TblParentBusinessTypes();
+        final TblEmployee tblEmployee = new TblEmployee();
+        tblEmployee.setId(employeeId);
+
+        if (content.get("adminParentBusinessTypesId") != null
+                && !content.get("adminParentBusinessTypesId").equals("")) {
+            tblParentBusinessTypes.setId(Long.valueOf(content.get("adminParentBusinessTypesId")));
+            getFacadeLookup().getPersistenceFacade().load(tblParentBusinessTypes);
+
+            tblParentBusinessTypes.setUpdatedDate(new Date());
+            tblParentBusinessTypes.setTblEmployeeByUpdatedBy(tblEmployee);
+        } else {
+            tblParentBusinessTypes.setCreatedDate(new Date());
+            tblParentBusinessTypes.setTblEmployeeByCreatedBy(tblEmployee);
+        }
+
+        if (content.get("cmbAdminParentBusinessTypesProjectId") != null
+                && !content.get("cmbAdminParentBusinessTypesProjectId").equals("-1")) {
+
+            TblBusinessTypes bt = new TblBusinessTypes();
+            bt.setId(Long.valueOf(content.get("cmbAdminParentBusinessTypesProjectId")));
+            tblParentBusinessTypes.setTblBusinessTypes(bt);
+        }
+        if (content.get("parentBusinessTypesid") != null
+                && !("").equals(content.get("parentBusinessTypesid"))
+                && !content.get("parentBusinessTypesid").equals("-1")) {
+            TblParentBusinessTypes tblParentBusinessTypes1 = new TblParentBusinessTypes();
+            tblParentBusinessTypes1.setId(Long.valueOf(content.get("parentBusinessTypesid")));
+            tblParentBusinessTypes.setTblParentBusinessTypes(tblParentBusinessTypes1);
+        } else {
+            tblParentBusinessTypes.setTblParentBusinessTypes(null);
+        }
+
+        if (content.get("orderNo") != null
+                && !("").equals(content.get("orderNo"))) {
+            tblParentBusinessTypes.setOrderNo(Integer.valueOf(content.get("orderNo")));
+        }
+
+        if (content.get("hdnActive") != null
+                && content.get("hdnActive").equals("1")) {
+            tblParentBusinessTypes.setStatus(UtilsConfigConstants.ACTIVE_STATUS);
+        } else {
+            tblParentBusinessTypes.setStatus(UtilsConfigConstants.INACTIVE_STATUS);
+        }
+
+        if (tblParentBusinessTypes.getId() == null) {
+            getFacadeLookup().getPersistenceFacade().save(tblParentBusinessTypes);
+        } else {
+            getFacadeLookup().getPersistenceFacade().update(tblParentBusinessTypes);
+        }
+        return tblParentBusinessTypes.getId().toString();
+    }
+
+    @Override
+    public String updateAdminParentBusinessTypesStatus(final Long adminParentBusinessTypesId,
+            final boolean status) throws CirightException {
+
+        if (adminParentBusinessTypesId == null || adminParentBusinessTypesId == -1L) {
+            throw new CirightException("Admin Parent Business Types Id Is Null");
+        }
+
+        final Map<String, Object> options = new HashMap<>();
+        options.put("adminParentBusinessTypesId", adminParentBusinessTypesId);
+
+        if (status) {
+            options.put(UtilsQueryParameterConstants.NEW_STATUS,
+                    UtilsConfigConstants.ACTIVE_STATUS);
+        } else {
+            options.put(UtilsQueryParameterConstants.NEW_STATUS,
+                    UtilsConfigConstants.INACTIVE_STATUS);
+        }
+
+        getFacadeLookup().getPersistenceFacade().findByNamedExecuteQueryC(
+                "update.admin.parent.business.types.status", new QueryOptions(options));
+
+        return "success";
+    }
+
+        @Override
+        public AdminParentBusinessTypesModel getAdminParentBusinessTypesDataById(final Long adminParentBusinessTypesId)
+                throws CirightException {
+    
+            if (adminParentBusinessTypesId == null || adminParentBusinessTypesId == -1L) {
+                throw new CirightException("Admin Parent Business Types Id Is Null");
+            }
+    
+            final Map<String, Object> options = new HashMap<>();
+            options.put("adminParentBusinessTypesId", adminParentBusinessTypesId);
+    
+            final List<Object[]> resultList = this.getFacadeLookup()
+                    .getPersistenceFacade()
+                    .findByNamedQueryC("get.admin.parent.business.types.data.by.id",
+                            new QueryOptions(options));
+            final AdminParentBusinessTypesModel model = new AdminParentBusinessTypesModel();
+            if (resultList != null && !resultList.isEmpty()
+                    && resultList.get(0) != null) {
+                resultList.forEach(obj -> {
+                    if (obj[0] != null) {
+                        model.setId(Long.valueOf(obj[0].toString()));
+                    }
+                    model.setBusinessTypeid(Long.valueOf(obj[1].toString()));
+                    model.setParentBusinessTypesid(
+                        obj[2] != null ? Long.valueOf(obj[2].toString()) : null);
+                    model.setOrderNo(obj[3].toString());
+                    model.setStatus(Short.valueOf(obj[4].toString()));
+                });
+            }
+            return model;
+        }
+        
+        @Override
+        public List<AdminParentBusinessTypesModel> getParentBusinessTypesByBusinessType(
+                Long businessTypeId,
+                Long subscriptionId,
+                Long verticalId) throws CirightException {
+
+            if (subscriptionId == null || subscriptionId == -1L) {
+                throw new CirightException("subscriptionId is Null");
+            }
+            if (verticalId == null || verticalId == -1L) {
+                throw new CirightException("verticalId is Null");
+            }
+
+            Map<String, Object> options = new HashMap<>();
+            options.put("subscriptionId", subscriptionId);
+            options.put("verticalId", verticalId);
+
+            if (businessTypeId != null) {
+                options.put("businessTypeId", businessTypeId);
+            }
+
+            List<Object[]> resultList =
+                getFacadeLookup().getPersistenceFacade()
+                    .findByNamedQueryC(
+                        businessTypeId != null
+                            ? "get.parent.business.types.by.business.type"
+                            : "get.all.parent.business.types.grid.data",
+                        new QueryOptions(options)
+                    );
+
+            List<AdminParentBusinessTypesModel> list = new ArrayList<>();
+
+            if (resultList != null) {
+                for (Object[] obj : resultList) {
+                    AdminParentBusinessTypesModel m = new AdminParentBusinessTypesModel();
+                    m.setId(Long.valueOf(obj[0].toString()));
+                    m.setBusinessTypeName(obj[1] != null ? obj[1].toString() : "");
+                    m.setParentBusinessTypesName(obj[2] != null ? obj[2].toString() : "");
+                    m.setOrderNo(obj[3] != null ? obj[3].toString() : "");
+                    m.setStatus(
+                            obj[4] != null
+                                ? Short.valueOf(obj[4].toString())
+                                : 0
+                        );
+                    list.add(m);
+                }
+            }
+            return list;
+        }
+        @Override
+        public Map<Long, String> getParentBusinessTypesForDropdown(
+                Long subscriptionId,
+                Long verticalId) throws CirightException {
+
+            Map<String, Object> options = new HashMap<>();
+            options.put("subscriptionId", subscriptionId);
+            options.put("verticalId", verticalId);
+
+            List<Object[]> resultList =
+                getFacadeLookup().getPersistenceFacade()
+                    .findByNamedQueryC(
+                        "get.parent.business.types.for.dropdown",
+                        new QueryOptions(options)
+                    );
+
+            Map<Long, String> map = new LinkedHashMap<>();
+
+            if (resultList != null) {
+                for (Object[] obj : resultList) {
+                    map.put(
+                        Long.valueOf(obj[0].toString()), 
+                        obj[1].toString()                
+                    );
+                }
+            }
+            return map;
+        }
+		
+	
+		
+
+package com.tristatehvac.ciright.command;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+import com.tristatehvac.ciright.persistence.BaseEntity;
+
+
+@Entity
+@NamedQueries({
+        @NamedQuery(name = "get.parent.business.types.for.dropdown", query = "SELECT DISTINCT " + " p2.id, " + " p2.tblBusinessTypes.typeOfBusiness " + "FROM TblParentBusinessTypes p " + "JOIN p.tblParentBusinessTypes p2 " + "WHERE p.status = 1 "  + "AND p2.status = 1 " + "ORDER BY p.orderNo ASC"),
+        @NamedQuery(name = "get.parent.business.types.by.business.type", query = "SELECT DISTINCT " + " p2.id, " + " p2.typeOfBusiness " + "FROM TblParentBusinessTypes p " + "JOIN p.tblBusinessTypes p2 " + "WHERE p.status = 1 " + "AND p2.status = 1 " + "ORDER BY p.orderNo ASC"),
+        @NamedQuery(name = "get.all.parent.business.types.grid.data", query = "SELECT "  + " p.id, " + " bt.typeOfBusiness, " + " pbt.tblBusinessTypes.typeOfBusiness, " + " p.orderNo, " + " p.status " + "FROM TblParentBusinessTypes p "+ "JOIN p.tblBusinessTypes bt "+ "LEFT JOIN p.tblParentBusinessTypes pbt "+ "WHERE p.status IN (0,1) " + "ORDER BY p.orderNo ASC"),
+        @NamedQuery(name = "update.admin.parent.business.types.status", query = "UPDATE TblParentBusinessTypes t SET t.status = :newStatus WHERE t.id = :adminParentBusinessTypesId"),
+        @NamedQuery(name = "validate.admin.parent.business.types.order.no.by.id.on.add", query = "SELECT t.id FROM TblParentBusinessTypes t WHERE t.tblEmployeeByCreatedBy.tblCustomer.id = :subscriptionId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId  AND t.orderNo = :orderNo"),
+        @NamedQuery(name = "validate.admin.parent.business.types.order.no.by.id.on.edit", query = "SELECT t.id FROM TblParentBusinessTypes t WHERE t.tblEmployeeByCreatedBy.tblCustomer.id = :subscriptionId AND t.tblEmployeeByCreatedBy.tblVerticalSolutions.id = :verticalId AND t.orderNo = :orderNo AND t.id != :adminParentBusinessTypesId"),
+        @NamedQuery(name = "get.admin.parent.business.types.data.by.id", query = "SELECT " + " t.id, " + " t.tblBusinessTypes.id, " + " t.tblParentBusinessTypes.id, " + " t.orderNo, " + " t.status "+ "FROM TblParentBusinessTypes t " + "WHERE t.id = :adminParentBusinessTypesId")
+})
+
+@Table(name = "tbl_parent_business_types")
+public class TblParentBusinessTypes extends BaseEntity implements java.io.Serializable {
+    
+    public TblParentBusinessTypes() {
+        super();
+    }
+    
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "parent_business_type_id")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "business_type_id")
+    private TblBusinessTypes tblBusinessTypes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_business_type")
+    private TblParentBusinessTypes tblParentBusinessTypes;
+
+    @Column(name = "order_no")
+    private Integer orderNo;
+
+    @Column(name = "active")
+    private Short status;
+
+    @Column(name = "created_date")
+    private Date createdDate;
+
+    @Column(name = "updated_date")
+    private Date updatedDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "created_by")
+    private TblEmployee tblEmployeeByCreatedBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "updated_by")
+    private TblEmployee tblEmployeeByUpdatedBy;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(Integer orderNo) {
+        this.orderNo = orderNo;
+    }
+    
+
+
+    public TblBusinessTypes getTblBusinessTypes() {
+        return tblBusinessTypes;
+    }
+
+    public void setTblBusinessTypes(TblBusinessTypes tblBusinessTypes) {
+        this.tblBusinessTypes = tblBusinessTypes;
+    }
+
+    public TblParentBusinessTypes getTblParentBusinessTypes() {
+        return tblParentBusinessTypes;
+    }
+
+    public void setTblParentBusinessTypes(
+            TblParentBusinessTypes tblParentBusinessTypes) {
+        this.tblParentBusinessTypes = tblParentBusinessTypes;
+    }
+
+    public Short getStatus() {
+        return status;
+    }
+
+    public void setStatus(Short status) {
+        this.status = status;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Date getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(Date updatedDate) {
+        this.updatedDate = updatedDate;
+    }
+
+    public TblEmployee getTblEmployeeByCreatedBy() {
+        return tblEmployeeByCreatedBy;
+    }
+
+    public void setTblEmployeeByCreatedBy(TblEmployee tblEmployeeByCreatedBy) {
+        this.tblEmployeeByCreatedBy = tblEmployeeByCreatedBy;
+    }
+
+    public TblEmployee getTblEmployeeByUpdatedBy() {
+        return tblEmployeeByUpdatedBy;
+    }
+
+    public void setTblEmployeeByUpdatedBy(TblEmployee tblEmployeeByUpdatedBy) {
+        this.tblEmployeeByUpdatedBy = tblEmployeeByUpdatedBy;
+    }
+    
+     
+}
+
+
+
+
+package com.tristatehvac.ciright.admin.model;
+
+public class AdminParentBusinessTypesModel {
+    
+    private Long id;
+    private Long businessTypeid;
+    private String businessTypeName;
+    private Long parentBusinessTypesid;
+    private String parentBusinessTypesName;
+    private String orderNo;
+    private Short status;
+    
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public Long getBusinessTypeid() {
+        return businessTypeid;
+    }
+    public void setBusinessTypeid(Long businessTypeid) {
+        this.businessTypeid = businessTypeid;
+    }
+    public String getBusinessTypeName() {
+        return businessTypeName;
+    }
+    public void setBusinessTypeName(String businessTypeName) {
+        this.businessTypeName = businessTypeName;
+    }
+    public Long getParentBusinessTypesid() {
+        return parentBusinessTypesid;
+    }
+    public void setParentBusinessTypesid(Long parentBusinessTypesid) {
+        this.parentBusinessTypesid = parentBusinessTypesid;
+    }
+    public String getParentBusinessTypesName() {
+        return parentBusinessTypesName;
+    }
+    public void setParentBusinessTypesName(String parentBusinessTypesName) {
+        this.parentBusinessTypesName = parentBusinessTypesName;
+    }
+    public String getOrderNo() {
+        return orderNo;
+    }
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+    public Short getStatus() {
+        return status;
+    }
+    public void setStatus(Short status) {
+        this.status = status;
+    }
+}
+
+
+CloudConfiguratorService
+   public Map<Long, String> getAdminParentBusinessTypeList(Long subscriptionId,
+            Long verticalId);
+			
+			
+		@Override
+    public Map<Long, String> getAdminParentBusinessTypeList(
+            final Long subscriptionId, final Long verticalId) {
+
+        final Map<Long, String> returnMap = new LinkedHashMap<>();
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put(UtilsQueryParameterConstants.SUBSCRIPTION_ID,
+                subscriptionId);
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID, verticalId);
+
+        final List<Object[]> resultList = getFacadeLookup()
+                .getPersistenceFacade()
+                .findByNamedQueryC("get.admin.all.business.type.list",
+                        new QueryOptions(options));
+        if (resultList != null && !resultList.isEmpty()) {
+            for (final Object[] obj : resultList) {
+                returnMap.put(Long.valueOf(obj[0].toString()),
+                        obj[1] != null ? obj[1].toString() : "");
+            }
+        }
+        return returnMap;
+    }

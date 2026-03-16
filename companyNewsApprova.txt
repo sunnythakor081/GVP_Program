@@ -1,0 +1,379 @@
+P3119994-                                                           http://192.168.1.206:9018/Ciright/login.htm  old
+961: admin - t - COmpany News Approval
+
+
+AdminController
+
+@Entity
+@NamedQueries({
+        @NamedQuery(name = "get.active.sphere.type.For.UserSpherepage", query = "SELECT DISTINCT tes.id , tes.typeDescription FROM TblEmployee te LEFT JOIN te.tblEmployeeSphereType tes LEFT JOIN te.tblCustomer tc LEFT JOIN te.tblVerticalSolutions tvs WHERE te.triStateEmail = :username AND te.password = :password AND te.activeEmployee = 1 AND tes.isLoginRequired  = 1 AND tvs.status = 1 AND tc.activeCustomer = 1 order by tc.name asc"),
+        @NamedQuery(name = "get.all.active.employee.sphere.type", query = "SELECT tes.id , tes.typeDescription FROM TblEmployeeSphereType tes WHERE tes.status = 1 ORDER BY tes.typeDescription"),
+        @NamedQuery(name = "get.employee.sphere.id.by.url", query = "SELECT tes.id FROM TblEmployeeSphereType tes WHERE tes.sphereUrl = :sphereUrl"),
+        @NamedQuery(name = "get.employee.sphere.type.by.sphere.type.id", query = "SELECT tes.typeDescription FROM TblEmployeeSphereType tes WHERE tes.id =:sphereTypeId AND tes.status = 1"),
+        @NamedQuery(name = "get.employee.sphere.type.by.subscription.vertical", query = "SELECT DISTINCT tes.id , tes.typeDescription FROM TblEmployee te LEFT JOIN te.tblEmployeeSphereType tes WHERE te.tblCustomer.id = :subscriptionId AND te.tblVerticalSolutions.id = :verticalId AND tes.status = 1 ORDER BY tes.typeDescription") })
+@Table(name = "tbl_employee_sphere_types")
+public class TblEmployeeSphereType extends BaseEntity
+        implements java.io.Serializable {
+
+    public TblEmployeeSphereType() {
+        super();
+    }
+
+else if (request.getRequestURI().contains("admin-company-news-approval")) {
+                String selectedUserTypeStr = request.getParameter("cmbUserTypeSearch");
+                if (selectedUserTypeStr == null || selectedUserTypeStr.trim().isEmpty()
+                        || "-1".equals(selectedUserTypeStr)) {
+                    selectedUserTypeStr = "1";
+                }
+                mv.addObject("selectedUserType", selectedUserTypeStr);
+                List<CompanyNewsApprovalModel> companyNewsApprovalList =
+                        getAdminService().getCompanyNewsApprovalData(
+                                Long.valueOf(selectedUserTypeStr));
+                mv.addObject("userTypeList",
+                        getEmployeeCommonService().getAllEmpSphereTypeMap());
+                mv.addObject("companyNewsApprovalList", companyNewsApprovalList);
+
+                mv.setViewName("admin.company.news.approval");
+                return mv;
+				
+		
+public interface EmployeeCommonService {
+    public Map<Long, String> getAllEmpSphereTypeMap() throws CirightException;
+
+
+EmployeeCommonServiceImpl
+ @Override
+    public Map<Long, String> getAllEmpSphereTypeMap() throws CirightException {
+        final List<Object[]> employeeSphereTypeList = this.getFacadeLookup()
+                .getPersistenceFacade()
+                .findByNamedQueryC("get.all.active.employee.sphere.type");
+        final Map<Long, String> sphereTypeMap = new LinkedHashMap<>();
+
+        if (employeeSphereTypeList != null
+                && !employeeSphereTypeList.isEmpty()) {
+            for (final Object[] obj : employeeSphereTypeList) {
+                sphereTypeMap.put(Long.valueOf(obj[0].toString()),
+                        obj[1].toString());
+            }
+        }
+
+        return sphereTypeMap;
+    }
+
+  @NamedQuery(name = "get.all.active.employee.sphere.type", query = "SELECT tes.id , tes.typeDescription FROM TblEmployeeSphereType tes WHERE tes.status = 1 ORDER BY tes.typeDescription"),
+        	
+		
+<definition name="admin.company.news.approval"
+		template="/WEB-INF/jsp/admin/adminCompanyNewsApproval.jsp" />
+		
+		
+		
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page language="java" pageEncoding="ISO-8859-1"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib prefix='security'
+	uri='http://www.springframework.org/security/tags'%>
+
+
+<div class="row" style="padding-top: 1%;">
+	<div class="col-md-12">
+		<div class="portlet box blue">
+			<div class="portlet-title">
+				<div class="caption">
+					<i class="fa fa-globe"></i>Advanced Search
+				</div>
+				<div class="tools">
+					<a class="expand" href="javascript:;"> </a>
+				</div>
+				<div class="actions"></div>
+			</div>
+			<div class="portlet-body">
+				<form action="#" role="form">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-group">
+
+								<div class="col-md-4">
+									<label class="control-label col-md-2">User Type</label>
+									<div class="col-md-8">
+										<select id="cmbUserTypeSearch" name="cmbUserTypeSearch"
+											class="form-control">
+											<c:forEach items="${userTypeList}" var="type">
+												<option value="${type.key}"
+													<c:if test="${type.key == selectedUserType}">selected</c:if>>
+													${type.value}</option>
+											</c:forEach>
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<button class="btn blue btn-block margin-top-20"
+					onClick="getCompanyNewsApprovalData();return false;">
+					SEARCH <i class="m-icon-swapright m-icon-white"></i>
+				</button>
+
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<input type="hidden" id="hiddenRightForEdit" value="${editRights}" />
+	<input type="hidden" id="hiddenRightForAdd" name="hiddenRightForAdd"
+		value="${addRights}"> <input type="hidden"
+		id="hiddenRightForExport" name="hiddenRightForExport"
+		value="${exportRights}" />
+	<div class="col-md-12">
+		<div class="portlet box blue">
+			<div class="portlet-title">
+				<div class="caption">
+					<i class="fa fa-cogs"></i>Company News Approval
+				</div>
+				<div class="actions">
+					<c:if test="${addRights == 1}">
+						<a href="javascript:displayAddCompanyNewsApproval()"
+							class="btn green"><i class="fa fa-plus"></i></a>
+					</c:if>
+				</div>
+
+			</div>
+			<div class="portlet-body">
+				<table class="table table-striped table-bordered table-hover"
+					id="tblCompanyNewsApproval">
+					<thead>
+						<tr>
+							<th>Employee Name</th>
+							<th>A/I</th>
+							<th>Edit</th>
+						</tr>
+					</thead>
+					<tbody>
+						<c:forEach var="companyNewsApprovalObj"
+							items="${companyNewsApprovalList}">
+							<tr>
+								<td
+									id="txtEmployee<c:out value = "${companyNewsApprovalObj.id}"/>"><c:out
+										value="${companyNewsApprovalObj.employeeName}"></c:out></td>
+								<td><c:choose>
+										<c:when test="${editRights eq 1}">
+											<a href="#"
+												onclick="updateCompanyNewsApprovalStatus('<c:out value = "${companyNewsApprovalObj.id}"/>')">
+												<c:if test="${companyNewsApprovalObj.status == 1}">
+													<i class="fa fa-check"
+														id="status<c:out value = "${companyNewsApprovalObj.id}"/>"></i>
+												</c:if> <c:if test="${companyNewsApprovalObj.status == 0}">
+													<i class="fa fa-times"
+														id="status${companyNewsApprovalObj.id}"></i>
+												</c:if>
+											</a>
+										</c:when>
+										<c:otherwise>
+											<c:if test="${companyNewsApprovalObj.status == 1}">
+												<i class="fa fa-check"></i>
+											</c:if>
+											<c:if test="${companyNewsApprovalObj.status == 0}">
+												<i class="fa fa-times"></i>
+											</c:if>
+										</c:otherwise>
+									</c:choose></td>
+								<td><c:choose>
+										<c:when test="${editRights eq 1}">
+											<a href="javascript:void(0)" class="btn btn-sm dark"
+												onclick="editCompanyNewsApproval('${companyNewsApprovalObj.id}');">
+												<i class="fa fa-edit"></i>
+											</a>
+										</c:when>
+										<c:otherwise>
+											<a href="#" class="btn btn-sm dark"
+												id="${companyNewsApprovalObj.id}"><i class="fa fa-eye"></i></a>
+										</c:otherwise>
+									</c:choose></td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="adminCompanyNewsApproval" tabindex="-1"
+	data-backdrop="static" data-keyboard="false" role="basic">
+
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true" onclick="clearAll()"></button>
+				<h4 class="modal-title">Add Company News Approval</h4>
+			</div>
+			<div class="modal-body">
+				<form name="adminCompanyNewsApprovalForm"
+					id="adminCompanyNewsApprovalForm" class="form-horizontal">
+					<input type="hidden" value="" id="approvalIdAdd" name="approvalId" />
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-group">
+
+								<div class="row">
+									<label class="control-label col-md-2">User Type</label>
+									<div class="col-md-6">
+										<select id="cmbUserTypeModal" name="cmbUserTypeModal"
+											class="form-control"
+											onchange="loadEmployeesByUserType(this.value)">
+											<option value="-1">-Select-</option>
+											<c:forEach var="obj" items="${userTypeList}"
+												varStatus="status">
+												<option value="${obj.key}">${obj.value}</option>
+											</c:forEach>
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="row">
+							<div class="col-md-2"></div>
+							<div class="col-md-8">
+							<div id="employeeTableWrapper">
+								<table class="table table-striped table-bordered table-hover"
+									id="tblEmployeeListId">
+
+									<thead>
+										<tr>
+											<th>Employee List</th>
+											<th style="width: 120px;">Check All <br /> <label
+												class="mt-checkbox mt-checkbox-outline"> <input
+													type="checkbox" id="checkAllEmployees" /> <span></span>
+											</label>
+											</th>
+										</tr>
+									</thead>
+									<tbody id="listOfEmployee">
+									</tbody>
+
+								</table>
+								</div>
+							</div>
+						</div>
+					</div>
+					</form>
+			</div>
+			<div class="modal-footer">
+				<c:if test="${editRights == 1 && addRights == 1}">
+					<button type="button" class="btn blue"
+						onclick="saveCompanyNewsApproval();return false;">Save</button>
+						</c:if>
+				<button type="button" onclick="clearAll()" class="btn default"
+					data-dismiss="modal">Close</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+<div class="modal fade" id="adminCompanyNewsApprovall" tabindex="-1"
+	data-backdrop="static" data-keyboard="false">
+
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					onclick="clearAll()"></button>
+				<h4 class="modal-title">Edit Company News Approval</h4>
+			</div>
+
+			<div class="modal-body">
+				<form class="form-horizontal">
+
+					<input type="hidden" id="approvalIdEdit" /> <input type="hidden"
+						id="sphereTypeId" />
+
+					<div class="row">
+
+						<div class="form-group">
+
+							<div class="col-md-12">
+								<label class="control-label col-md-3">User Type</label>
+								<div class="col-md-6">
+									<select id="cmbUserTypeModalEdit" name="cmbUserTypeModalEdit"
+										class="form-control" disabled>
+										<option value="-1">-Select-</option>
+										<c:forEach var="obj" items="${userTypeList}">
+											<option value="${obj.key}">${obj.value}</option>
+										</c:forEach>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-group">
+								<label class="col-md-3 control-label">Employee Name</label>
+								<div class="col-md-6">
+									<select id="employeeDropdown" class="form-control">
+										<option value="">-- Select Employee --</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+			</div>
+			</form>
+               <div class="modal-footer">
+				<button type="button" class="btn blue"
+					onclick="saveCompanyNewsApproval();">Save</button>
+                   <button class="btn default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('#tblCompanyNewsApproval').dataTable({
+			"language" : {
+				"aria" : {
+					"sortAscending" : ": activate to sort column ascending",
+					"sortDescending" : ": activate to sort column descending"
+				},
+				"emptyTable" : "No data available in table",
+				"info" : "Showing _START_ to _END_ of _TOTAL_ entries",
+				"infoEmpty" : "No entries found",
+				"infoFiltered" : "(filtered1 from _MAX_ total entries)",
+				"lengthMenu" : "_MENU_ entries",
+				"search" : "Search:",
+				"zeroRecords" : "No matching records found"
+			},
+			"lengthMenu" : [ [ 15, 50, 80, -1 ], [ 15, 50, 80, "All" ] // change per page values here
+			],
+			"pageLength" : 15,
+			"columnDefs" : [ {
+				"targets" : [ 2 ],
+				"orderable" : false
+			} ],
+			"order" : [ [ 1, 'asc' ], [ 0, 'asc' ] ]
+		});
+	});
+
+	function clearAll() {
+		resetForm('adminCompanyNewsApprovalForm');
+		dwr.util.removeAllOptions('listOfEmployee');
+		dwr.util.addOptions('listOfEmployee', [ {
+			id : '-1',
+			name : '--Select--'
+		} ], 'id', 'name');
+	}
+</script>		columnDefs:[
+{targets:0,orderable:true},
+{targets:1,orderable:true},
+{targets:2,orderable:true}
+]

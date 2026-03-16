@@ -1,0 +1,52 @@
+package com.tristatehvac.ciright.command;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+import com.tristatehvac.ciright.persistence.BaseEntity;
+
+@Entity
+@NamedQueries({
+		@NamedQuery(name = "update.admin.manufucturer_contact_group.status", query = "UPDATE TblManufucturerContactGroup t SET t.isAllSphereType = :newStatus WHERE t.id = :manufucturercontactgroup"),
+		@NamedQuery(name = "get.admin.manufucturer_contact_group.id", query = "SELECT t.id, t.manufucturerContactGroup,  t.status FROM TblManufucturerContactGroup t WHERE t.id = :manufucturercontactgroup"),
+  
+@Table(name = "tbl_manufucturer_contact_group")
+public class TblManufucturerContactGroup extends BaseEntity
+        implements java.io.Serializable {
+
+    public TblManufucturerContactGroup() {
+        super();
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "admin_manufucturer_contact_group_id")
+    private Long id;
+
+    @Column(name = "manufucturer_contact_group_name")
+    private String manufucturerContactGroupName;
+
+    @Column(name = "status")
+    private Short status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "created_by")
+    private TblEmployee tblEmployeeByCreatedBy;
+
+    @Column(name = "created_date")
+    private Date createdDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "updated_by")
+    private TblEmployee tblEmployeeByUpdatedBy;
+
+    @Column(name = "updated_date")
+    private Date updatedDate;
+
+    
+	
+	getters & setters
+
+}
