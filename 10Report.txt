@@ -1,0 +1,70 @@
+Admin - T - Tab Audit
+
+Customer -Editable Tab Name And Add Change Log
+customer sphere Editable Tab Name And Add Change Log
+
+Admin-T-Goal Status
+create table and add goalname orderNo 
+
+
+History - Icon next to the Calendar
+New Tab - User Project History
+
+Please create an icon a simple history icon
+
+Then a simple UI that will list all the projects a user has accessed and Date time, we can use from the dashboard the new project form just crop to be smaller width
+
+Projects do not repeat its the latest date time a user accessed a project
+
+Simple Infinite Scroll Date Time, Project ID, Project Name
+
+Click on the project and go directly to the project 
+
+
+
+
+Manufacture r- T - New Product Ranking
+
+Product Name - text 
+
+Priority - integer 
+
+Order - Integer 
+
+Description - memo
+
+Mote - Description 
+
+Software - Y N 
+
+Hardware - Y N 
+
+Networked Device - Y N 
+
+Estimated Time - 
+
+Estimated Capital - 
+
+Ecosystem Target - text 
+
+B to C - Y N 
+
+B to B to C - Y N 
+
+TAM Volumne 
+
+TAM Customers
+
+deck - fk 
+
+team - FK 
+
+Global - Y N 
+
+country - FK
+
+product_id - FK - once we decide to make it a product 
+
+
+
+may need new fields additional as well this is a great start
