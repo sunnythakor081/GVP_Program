@@ -1,0 +1,330 @@
+String tabWithGrp = "SELECT DISTINCT t1.tabid, t1.tab_label 
+FROM tbl_tab_master t1 
+WHERE t1.sphere_id = :sphereId 
+AND t1.tab_groupid=:tabGrpId 
+AND t1.status = 1";
+
+
+'data' : ${empty tabListObj ? '[]' : tabListObj}
+
+'data' : ${tabListObj}
+
+
+
+bau time pela me 2 entity class ma + vadi query banaveli che to ae solve kari aa branch ma marge kari dau..? 
+
+
+    
+    @Override
+    public ApiResponseModel<?> getEmployeeApiList(
+            CirightOKREmployeeApiModel model) throws CirightException {
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId().longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null
+                || model.getVerticalId().longValue() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        if (model.getAppId() == null || model.getAppId().longValue() == -1) {
+            throw new InvalidParameterException("App Id is not available",
+                    "appId");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "loginEmployeeId");
+        }
+
+        final ApiResponseModel<List<CirightOKREmployeeApiModel>> apiResponse = new ApiResponseModel<>();
+
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put(UtilsQueryParameterConstants.SUBSCRIPTION_ID,
+                model.getSubscriptionId());
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID,
+                model.getVerticalId());
+        options.put(UtilsQueryParameterConstants.SPHERE_TYPE_ID,
+                UtilsConfigConstants.EMPLOYEE_SPHERE_TYPE);
+
+
+        String sqlQuery = "SELECT e.EmployeeID AS col_0_0, "
+                + "e.FirstName AS col_0_1, "
+                + "e.Title AS col_0_2, "
+                + "es.status_description AS col_0_3, "
+                + "e.HireDate AS col_0_4, "
+                + "e.Date_Of_Termination AS col_0_5, "
+                + "tr.description AS col_0_6, "
+                + "eat.active_team_id AS col_0_7, "
+                + "t.TeamId AS col_0_8, "
+                + "t.Team_Description AS col_0_9 "
+                + "FROM tbl_employee e "
+                + "LEFT JOIN tbl_employee_status es ON es.status_id = e.status_id "
+                + "LEFT JOIN tbl_employee_termination_reasons tr ON tr.emp_termination_reason_id = e.termination_reason_id "
+                + "LEFT JOIN tbl_employee_active_team eat ON eat.employee_id = e.EmployeeID AND eat.status = 1 "
+                + "LEFT JOIN tbl_employee_team t ON t.TeamId = eat.team_id "
+                + "WHERE e.CompanyID = :subscriptionId "
+                + "AND e.Vertical_Id = :verticalId";
+        
+        
+        final List<Object[]> resultList = getFacadeLookup()
+                .getPersistenceFacade().findByNativeQueryC(sqlQuery,
+                        new QueryOptions(options), Object[].class);
+
+        Map<Long, CirightOKREmployeeApiModel> employeeMap = new LinkedHashMap<>();
+
+        if (resultList != null && !resultList.isEmpty()) {
+
+            for (final Object[] obj : resultList) {
+
+                Long empId = obj[0] != null ? Long.valueOf(obj[0].toString()) : -1L;
+
+                employeeMap.computeIfAbsent(empId, id -> {
+
+                    CirightOKREmployeeApiModel emp = new CirightOKREmployeeApiModel();
+
+                    emp.setEmployeeId(empId);
+                    emp.setEmployeeName(obj[1] != null ? obj[1].toString() : "");
+                    emp.setTitle(obj[2] != null ? obj[2].toString() : "");
+                    emp.setEmploymentStatus(obj[3] != null ? obj[3].toString() : "");
+                    emp.setHireDate(obj[4] != null ? df.format(obj[4]) : "");
+                    emp.setDateOfTermination(obj[5] != null ? df.format(obj[5]) : "");
+                    emp.setTerminationReasons(obj[6] != null ? obj[6].toString() : "");
+
+                    emp.setTeamId(new Long[0]);
+                    emp.setTeam(new String[0]);
+
+                    return emp;
+                });
+
+                CirightOKREmployeeApiModel emp = employeeMap.get(empId);
+
+                if (obj[8] != null && obj[9] != null) {
+
+                    List<Long> teamIds = new ArrayList<>(Arrays.asList(emp.getTeamId()));
+                    List<String> teamNames = new ArrayList<>(Arrays.asList(emp.getTeam()));
+
+                    Long teamId = Long.valueOf(obj[8].toString());
+                    String teamName = obj[9].toString();
+
+                    if (!teamIds.contains(teamId)) {
+                        teamIds.add(teamId);
+                        teamNames.add(teamName);
+                    }
+
+                    emp.setTeamId(teamIds.toArray(new Long[0]));
+                    emp.setTeam(teamNames.toArray(new String[0]));
+                }
+            }
+            }
+    apiResponse.setStatus(true);
+    apiResponse.setMessage("success");
+    apiResponse.setData(new ArrayList<>(employeeMap.values()));
+    return apiResponse;
+    }
+	
+	
+	
+	
+	 private Long activeTeamId;
+    private Long teamId;
+    private String teamName;
+	
+	
+	 public ApiResponseModel<?> getEmployeeApiList(
+            CirightOKREmployeeApiModel model)
+            throws CirightException, InvalidParameterException;
+	
+	
+	 @Override
+    public ApiResponseModel<?> getEmployeeApiList(
+            CirightOKREmployeeApiModel model) throws CirightException {
+
+        if (model.getSubscriptionId() == null
+                || model.getSubscriptionId().longValue() == -1) {
+            throw new InvalidParameterException(
+                    "Subscription Id is not available", "subscriptionId");
+        }
+
+        if (model.getVerticalId() == null
+                || model.getVerticalId().longValue() == -1) {
+            throw new InvalidParameterException("Vertical Id is not available",
+                    "verticalId");
+        }
+
+        if (model.getAppId() == null || model.getAppId().longValue() == -1) {
+            throw new InvalidParameterException("App Id is not available",
+                    "appId");
+        }
+
+        if (model.getLoginEmployeeId() == null
+                || model.getLoginEmployeeId().longValue() == -1) {
+            throw new InvalidParameterException("Employee Id is not available",
+                    "loginEmployeeId");
+        }
+
+        final ApiResponseModel<List<CirightOKREmployeeApiModel>> apiResponse = new ApiResponseModel<>();
+
+        final Map<String, Object> options = new HashMap<>();
+
+        options.put(UtilsQueryParameterConstants.SUBSCRIPTION_ID,
+                model.getSubscriptionId());
+        options.put(UtilsQueryParameterConstants.VERTICAL_ID,
+                model.getVerticalId());
+        options.put(UtilsQueryParameterConstants.SPHERE_TYPE_ID,
+                UtilsConfigConstants.EMPLOYEE_SPHERE_TYPE);
+
+
+        String sqlQuery = "SELECT e.EmployeeID, "
+                + "e.FirstName, "
+                + "e.Title, "
+                + "es.status_description, "
+                + "e.HireDate, "
+                + "e.Date_Of_Termination, "
+                + "tr.description, "
+                + "eat.active_team_id, "
+                + "t.TeamId, "
+                + "t.Team_Description "
+                + "FROM tbl_employee e "
+                + "LEFT JOIN tbl_employee_status es ON es.status_id = e.status_id "
+                + "LEFT JOIN tbl_employee_termination_reasons tr ON tr.emp_termination_reason_id = e.termination_reason_id "
+                + "LEFT JOIN tbl_employee_active_team eat ON eat.employee_id = e.EmployeeID AND eat.status = 1 "
+                + "LEFT JOIN tbl_employee_team t ON t.TeamId = eat.team_id "
+                + "WHERE e.CompanyID = :subscriptionId "
+                + "AND e.Vertical_Id = :verticalId";
+        
+        
+        final List<Object[]> resultList = getFacadeLookup()
+                .getPersistenceFacade().findByNativeQueryC(sqlQuery,
+                        new QueryOptions(options), Object[].class);
+
+        Map<Long, CirightOKREmployeeApiModel> employeeMap = new LinkedHashMap<>();
+
+        for (Object[] obj : resultList) {
+
+            Long empId = obj[0] != null ? Long.valueOf(obj[0].toString()) : -1L;
+
+            employeeMap.computeIfAbsent(empId, id -> {
+
+                CirightOKREmployeeApiModel responseModel = new CirightOKREmployeeApiModel();
+
+                responseModel.setEmployeeId(empId);
+                responseModel.setEmployeeName(obj[1] != null ? obj[1].toString() : "");
+                responseModel.setTitle(obj[2] != null ? obj[2].toString() : "");
+                responseModel.setEmploymentStatus(obj[3] != null ? obj[3].toString() : "");
+                responseModel.setHireDate(obj[4] != null ? df.format(obj[4]) : "");
+                responseModel.setDateOfTermination(obj[5] != null ? df.format(obj[5]) : "");
+                responseModel.setTerminationReasons(obj[6] != null ? obj[6].toString() : "");
+
+                responseModel.setTeams(new ArrayList<>());
+
+                return responseModel;
+            });
+
+            CirightOKREmployeeApiModel emp = employeeMap.get(empId);
+
+            if (obj[7] != null && obj[8] != null) {
+
+                CirightOKRTeamApiModel team = new CirightOKRTeamApiModel();
+
+                team.setActiveTeamId(Long.valueOf(obj[7].toString()));
+                team.setTeamId(Long.valueOf(obj[8].toString()));
+                team.setTeamName(obj[9] != null ? obj[9].toString() : "");
+
+                emp.getTeams().add(team);
+            }
+        }
+        apiResponse.setStatus(true);
+        apiResponse.setMessage("success");
+        apiResponse.setData(new ArrayList<>(employeeMap.values()));
+        return apiResponse;
+    }
+
+
+
+
+  @RequestMapping(value = "/getEmployeeApiList", method = RequestMethod.POST)
+    public ResponseEntity<?> getEmployeeApiList(
+            @RequestBody CirightOKREmployeeApiModel model) {
+        ApiResponseModel<?> response = null;
+        try {
+            response = cirightOKRService.getEmployeeApiList(model);
+        } catch (final InvalidParameterException e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<Object>();
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (final Exception e) {
+            LOGGER.error("Error: ", e);
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("Internal server error");
+            return new ResponseEntity<>(response,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (response == null) {
+            response = new ApiResponseModel<>();
+            response.setStatus(false);
+            response.setMessage("No Content");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<ApiResponseModel<?>>(response, HttpStatus.OK);
+    }
+
+
+
+@JsonInclude(Include.NON_NULL)
+public class CirightOKREmployeeApiModel implements Serializable {
+    
+    private Long subscriptionId;
+    private Long verticalId;
+    private Long appId;
+    private Long loginEmployeeId;
+    private Long employeeId;
+    private String employeeName; 
+    private String title;
+    private Long statusid;
+    private String employmentStatus;
+    private String hireDate;
+    private String dateOfTermination;
+    private Long terminationReasonsid;
+    private String terminationReasons;
+    private List<CirightOKRTeamApiModel> teams;
+	
+	
+	
+	
+	
+@JsonInclude(Include.NON_NULL)
+public class CirightOKRTeamApiModel implements Serializable{
+    
+    private Long activeTeamId;
+   private Long teamId;
+   private String teamName;
+public Long getActiveTeamId() {
+    return activeTeamId;
+}
+public void setActiveTeamId(Long activeTeamId) {
+    this.activeTeamId = activeTeamId;
+}
+public Long getTeamId() {
+    return teamId;
+}
+public void setTeamId(Long teamId) {
+    this.teamId = teamId;
+}
+public String getTeamName() {
+    return teamName;
+}
+public void setTeamName(String teamName) {
+    this.teamName = teamName;
+}
+
+}
